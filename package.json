@@ -1,0 +1,32 @@
+{
+  "name": "@panda-clouds/parse-runner",
+  "scripts": {
+    "pretest": "eslint .",
+    "test": "jest"
+  },
+  "description": "Spins up dockerized Parse Server and Mongo instances for testing",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/panda-clouds/parse-runner.git"
+  },
+  "author": {
+    "name": "Marc Smith",
+    "email": "mr.marcsmith@me.com",
+    "url": "https://github.com/mrmarcsmith"
+  },
+  "license": "MIT",
+  "main": "src/PCParseRunner.js",
+  "engines": {
+    "node": ">= 8"
+  },
+  "dependencies": {
+    "@panda-clouds/parse-bash": "^1.1.0",
+    "parse": "^2.1.0"
+  },
+  "devDependencies": {
+    "@panda-clouds/eslint-config-panda-clouds": "^0.9.0",
+    "eslint": "^4.18.1",
+    "jest": "^24.1.0"
+  }
+}
