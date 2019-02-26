@@ -1,9 +1,9 @@
 
-PCParseJasmine
+PCParseRunner
 =========
 maintained by [PandaClouds.com](https://pandaclouds.com)
 
-`PCParseJasmine` is a lightweight JavaScript library for Node.js that provides additional String methods.
+`PCParseRunner` spins up dockerized "Parse Server" and "Mongo" instances for testing.
 
 
 Installation
@@ -16,7 +16,7 @@ Installation
 3. Please run the following command.
 
 ```
-npm install --save @panda-clouds/parse-jasmine
+npm install --save-dev @panda-clouds/parse-runner
 ```
 
 Usage
@@ -25,74 +25,50 @@ Usage
 ### Node.js
 
 ```javascript
-const PCParseJasmine = require('@panda-clouds/parse-jasmine');
+const PCParseRunner = require('@panda-clouds/parse-runner');
 
-// example usage
-PCParseJasmine.isString('yup!'); // => true;
-PCParseJasmine.hasWhitespace('ABC'); // => false;
+
+describe('a describe block', () => {
+
+	const parseRunner = new PCParseRunner();
+
+	parseRunner.parseVersion(version);
+
+	// begin optional cloud code
+	const cloud =
+`
+Parse.Cloud.define('myFunction', function(request, response) {
+	return 'myResults';
+});
+`;
+	parseRunner.cloud(cloud);
+	// end optional cloud code
+
+	beforeAll(async () => {
+		await parseRunner.startParseServer();
+	}, 1000 * 60 * 2);
+
+	afterAll(async () => {
+		await parseRunner.cleanUp();
+	});
+
+	it('should call a Parse function', async () => {
+		const result = await Parse.Cloud.run('myFunction');
+
+		expect(result).toBe('myResults');
+		expect(result).not.toBe('superman');
+	});
+})
 ```
 
-You can replace PCParseJasmine with any variable.
+You can replace PCParseRunner with any variable.
 
 
 Methods
 -------
 
-[Unit Tests] are an additional resource for learning functionality.
+[Unit Tests] are the best resource for learning functionality.
 
-### - isString(string)
-
-Returns whether a given object is a String.
-
-Example:
-
-```javascript
-PCParseJasmine.isString('ABC') // => true
-PCParseJasmine.isString(5) // => false
-PCParseJasmine.isString({}) // => false
-PCParseJasmine.isString([]) // => false
-```
-
-### - hasWhiteSpace(string)
-
-returns true if the string has white space, false if not.
-
-
-Example:
-
-```javascript
-PCParseJasmine.hasWhitespace(' ') // => true
-PCParseJasmine.hasWhitespace('A B') // => true
-PCParseJasmine.hasWhitespace('AB') // => false
-PCParseJasmine.hasWhitespace('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-!@#$%^&*()') // => false
-```
-
-
-### - removeWhitespace(string)
-
-Removes all white characters from the given string.
-
-Example:
-
-```javascript
-PCParseJasmine.removeWhitespace(' A B  C   D    ') // => 'ABCD'
-PCParseJasmine.removeWhitespace('	A	B	C			D	') // => 'ABCD'
-PCParseJasmine.removeWhitespace('\nA\nB\n\nC\n\n\nD\n\n\n\n') // => 'ABCD'
-PCParseJasmine.removeWhitespace(null) // => ''
-```
-
-### - domainSafeString(string)
-
-Removes all non-domain-safe characters.
-
-Example:
-
-```javascript
-PCParseJasmine.domainSafeString('_A_B__C___D____') // => 'ABCD'
-PCParseJasmine.domainSafeString('	A	B	C			D	') // => 'ABCD'
-PCParseJasmine.domainSafeString('\nA\nB\n\nC\n\n\nD\n\n\n\n') // => 'ABCD'
-PCParseJasmine.domainSafeString(null) // => ''
-```
 
 
 Contributions
@@ -100,8 +76,8 @@ Contributions
 
 Pull requests are welcome! here is a checklist to speed things up:
 
-- modify `PCParseJasmine.js`
-- add unit tests in `PCParseJasmine.spec.js`
+- modify `PCParseRunner.js`
+- add unit tests in `PCParseRunner.spec.js`
 - run `npm test`
 - document method in `README.md`
 - add your name to 'Contributors' in `README.md`
@@ -114,4 +90,4 @@ Pull requests are welcome! here is a checklist to speed things up:
 - [*] [Marc Smith](https://github.com/mrmarcsmith)
 
 
-[Unit Tests]: https://github.com/panda-clouds/string/blob/master/spec/PCParseJasmine.spec.js
+[Unit Tests]: https://github.com/panda-clouds/string/blob/master/spec/PCParseRunner.spec.js
