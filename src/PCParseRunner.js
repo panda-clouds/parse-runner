@@ -127,7 +127,7 @@ class PCParseRunner {
 		await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/main-' + this.seed + '.js');
 
 
-		await PCBash.runCommandPromise('docker run --rm -d ' + this.net + ' ' +
+		await PCBash.runCommandPromise('docker run -d ' + this.net + ' ' +
 		'--name parse-' + this.seed + ' ' +
 		'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
 		'-v ' + PCParseRunner.tempDir() + ':/parse-server/cloud/ ' +
@@ -136,17 +136,29 @@ class PCParseRunner {
 		'/parse-server/configuration.json');
 
 		await PCBash.runCommandPromise(
+			'export PC_RUNNER_PARSE_TRIES=10\n' +
 			'until $(curl --output /dev/null --silent --head --fail http://localhost:1337/1/health); do\n' +
-		'    printf \'Waiting for Parse Server to come up...\n\'\n' +
-		'    sleep 1\n' +
-		'done'
+			'    printf \'Waiting for Parse Server to come up...\n\'\n' +
+			'    sleep 1\n' +
+			'    ((PC_RUNNER_PARSE_TRIES--))\n' +
+			'    if [ "$PC_RUNNER_PARSE_TRIES" -eq "0" ]; then\n' +
+			'        echo "Timed out";\n' +
+			'        exit 1;\n' +
+			'    fi\n' +
+			'done'
 		);
 
 		await PCBash.runCommandPromise(
+			'export PC_RUNNER_MONGO_TRIES=10\n' +
 			'until $(curl --output /dev/null --silent --fail http://localhost:27017); do\n' +
-		'    printf \'Waiting for Mongo to come up...\n\'\n' +
-		'    sleep 1\n' +
-		'done'
+			'    printf \'Waiting for Mongo to come up...\n\'\n' +
+			'    sleep 1\n' +
+			'    ((PC_RUNNER_MONGO_TRIES--))\n' +
+			'    if [ "$PC_RUNNER_MONGO_TRIES" -eq "0" ]; then\n' +
+			'        echo "Timed out";\n' +
+			'        exit 1;\n' +
+			'    fi\n' +
+			'done'
 		);
 
 		Parse.initialize(exampleAppId, exampleJavascriptKey, exampleMasterKey);
@@ -201,6 +213,12 @@ class PCParseRunner {
 
 		try {
 			await PCBash.runCommandPromise('docker stop parse-' + this.seed);
+		} catch (e) {
+			// Disregard failures
+		}
+
+		try {
+			await PCBash.runCommandPromise('docker rm parse-' + this.seed);
 		} catch (e) {
 			// Disregard failures
 		}
