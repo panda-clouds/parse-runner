@@ -1,4 +1,3 @@
-
 const PCParseRunner = require('../src/PCParseRunner.js');
 const Parse = require('parse/node');
 
@@ -8,7 +7,6 @@ function runAllTests(version, cloud) {
 
 		parseRunner.parseVersion(version);
 		parseRunner.cloud(cloud);
-		parseRunner.loadFile('./src/PCTestClass.js', 'PCTestClass.js');
 
 		beforeAll(async () => {
 			await parseRunner.startParseServer();
@@ -26,7 +24,7 @@ function runAllTests(version, cloud) {
 			expect(result).not.toBe('superman');
 		});
 
-		it('should read from dynamic class', async () => {
+		xit('should read from dynamic class', async () => {
 			expect.assertions(2);
 			const result = await Parse.Cloud.run('useDynamicClass');
 
@@ -91,10 +89,6 @@ const cloudV2 =
 Parse.Cloud.define('challenge', function(request, response) {
   response.success('everest');
 });
-Parse.Cloud.define('useDynamicClass', function(request, response) {
-	const MyClass = require(__dirname + '/PCTestClass.js');
-	response.success(MyClass.challenge());
-});
 Parse.Cloud.beforeSave('FailClass',(request,response)=>{
 	response.error('Saves to this class always fail');
 })
@@ -108,11 +102,6 @@ const cloudV3 =
 `
 Parse.Cloud.define('challenge', function(request, response) {
 	return 'everest';
-});
-Parse.Cloud.define('useDynamicClass', async request => {
-
-	const MyClass = require(__dirname + '/PCTestClass.js');
-	return await MyClass.challenge()
 });
 Parse.Cloud.beforeSave('FailClass', request => {
 	throw new Error('Saves to this class always fail');
