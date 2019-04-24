@@ -166,7 +166,7 @@ class PCParseRunner {
 		// eslint-disable-next-line no-console
 		console.log('Parse Server up and running');
 
-		return Parse
+		return Parse;
 	}
 
 	async dropDB() {

@@ -1,6 +1,6 @@
 
 const PCParseRunner = require('../src/PCParseRunner.js');
-const Parse = require('parse/node');
+let Parse;
 
 function runAllTests(version, cloud) {
 	describe('check beforesave in v' + version, () => {
@@ -11,7 +11,7 @@ function runAllTests(version, cloud) {
 		parseRunner.loadFile('./src/PCTestClass.js', 'PCTestClass.js');
 
 		beforeAll(async () => {
-			await parseRunner.startParseServer();
+			Parse = await parseRunner.startParseServer();
 		}, 1000 * 60 * 2);
 
 		afterAll(async () => {

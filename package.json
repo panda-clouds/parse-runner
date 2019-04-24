@@ -22,11 +22,12 @@
   },
   "dependencies": {
     "@panda-clouds/parse-bash": "^1.1.0",
-    "parse": "^2.1.0"
+    "parse": "^2.3.2"
   },
   "devDependencies": {
     "@panda-clouds/eslint-config-panda-clouds": "^0.9.0",
     "eslint": "^4.18.1",
+    "eslint-plugin-jasmine": "^2.10.1",
     "jest": "^24.1.0"
   }
 }
