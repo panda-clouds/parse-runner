@@ -165,6 +165,8 @@ class PCParseRunner {
 		Parse.serverURL = 'http://localhost:1337/1';
 		// eslint-disable-next-line no-console
 		console.log('Parse Server up and running');
+
+		return Parse
 	}
 
 	async dropDB() {
