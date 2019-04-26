@@ -1,5 +1,6 @@
 /* global Promise */
 const fs = require('fs');
+const notBothError = 'Only set projectDir OR cloud, Not Both.';
 
 fs.readFileAsync = filename => {
 	return new Promise((resolve, reject) => {
@@ -25,17 +26,30 @@ class PCParseRunner {
 
 		this.seed = now.getTime();
 		this.parseVersionValue = '3.1.3';
+		this.mainPath = 'main.js';
 	}
 
 	parseVersion(version) {
 		this.parseVersionValue = version;
 	}
-	loadFile(path, name) {
-		this.requireFilePath = path;
-		this.requireFileName = name;
+
+	main(path) {
+		this.mainPath = path;
+	}
+
+	projectDir(path) {
+		if (this.cloudPage) {
+			throw new Error(notBothError);
+		}
+
+		this.projectDirValue = path;
 	}
 
 	cloud(cloudPage) {
+		if (this.projectDirValue) {
+			throw new Error(notBothError);
+		}
+
 		this.cloudPage = cloudPage;
 	}
 
@@ -95,6 +109,14 @@ class PCParseRunner {
 
 		await PCBash.runCommandPromise(makeMongo);
 
+		if (this.projectDirValue) {
+			await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + ' ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
+		} else if (this.cloudPage) {
+			this.mainPath = 'main.js';
+			await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
+			await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');
+		}
+
 		const config = {};
 
 		config.allowInsecureHTTP = true;
@@ -111,26 +133,17 @@ class PCParseRunner {
 		app.databaseURI = 'mongodb://' + this.hostURL + ':27017/' + PCParseRunner.defaultDBName();
 		app.publicServerURL = 'http://localhost:' + app.port + app.mountPath;
 		app.serverURL = app.publicServerURL;
-		app.cloud = '/parse-server/cloud/main-' + this.seed + '.js';
+		app.cloud = '/parse-server/cloud/' + this.mainPath;
 		config.apps = [app];
 
 		await PCBash.putStringInFile(config, PCParseRunner.tempDir() + '/config-' + this.seed);
 
 		await PCBash.runCommandPromise('pwd');
 
-		if (this.requireFilePath) {
-			const result = await fs.readFileAsync(this.requireFilePath);
-
-			await PCBash.putStringInFile(result, PCParseRunner.tempDir() + '/' + this.requireFileName);
-		}
-
-		await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/main-' + this.seed + '.js');
-
-
 		await PCBash.runCommandPromise('docker run -d ' + this.net + ' ' +
 		'--name parse-' + this.seed + ' ' +
 		'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
-		'-v ' + PCParseRunner.tempDir() + ':/parse-server/cloud/ ' +
+		'-v ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + ':/parse-server/cloud/ ' +
 		'-p 1337:1337 ' +
 		'parseplatform/parse-server:' + this.parseVersionValue + ' ' +
 		'/parse-server/configuration.json');
@@ -206,8 +219,8 @@ class PCParseRunner {
 		}
 
 		try {
-			if (this.requireFileName) {
-				await PCBash.runCommandPromise('rm ' + PCParseRunner.tempDir() + '/' + this.requireFileName);
+			if (this.projectDirValue) {
+				await PCBash.runCommandPromise('rm -r ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
 			}
 		} catch (e) {
 			// Disregard failures

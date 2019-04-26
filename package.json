@@ -5,7 +5,7 @@
     "test": "jest --runInBand"
   },
   "description": "Spins up dockerized Parse Server and Mongo instances for testing",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/panda-clouds/parse-runner.git"
@@ -28,6 +28,7 @@
     "@panda-clouds/eslint-config-panda-clouds": "^0.9.0",
     "eslint": "^4.18.1",
     "eslint-plugin-jasmine": "^2.10.1",
+    "eslint-plugin-prettier": "^3.0.1",
     "jest": "^24.1.0"
   }
 }

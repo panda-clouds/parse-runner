@@ -7,7 +7,6 @@ function runAllTests(version, cloud) {
 
 		parseRunner.parseVersion(version);
 		parseRunner.cloud(cloud);
-		parseRunner.loadFile('./src/PCTestClass.js', 'PCTestClass.js');
 
 		it('should timeout', async () => {
 			expect.assertions(1);
@@ -16,7 +15,6 @@ function runAllTests(version, cloud) {
 				await parseRunner.startParseServer();
 				expect(1).toBe(2);
 			} catch (e) {
-				console.log('error: ' + JSON.stringify(e));
 				await parseRunner.cleanUp();
 				expect(1).toBe(1);
 			}
