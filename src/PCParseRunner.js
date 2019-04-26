@@ -105,7 +105,7 @@ class PCParseRunner {
 			this.hostURL = 'host.docker.internal';
 			this.net = '';
 		} else if (OSType === 'Linux') {
-			this.hostURL = 'localhost';
+			this.hostURL = '127.0.0.1';
 			this.net = '--net host';
 		}
 
