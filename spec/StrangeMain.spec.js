@@ -6,7 +6,8 @@ describe('full project', () => {
 	const parseRunner = new PCParseRunner();
 
 	parseRunner.parseVersion('3.1.3');
-	parseRunner.projectDir('./src/full-project');
+	parseRunner.projectDir('./src/strange-main-project');
+	parseRunner.main('strangeMain.js');
 
 	beforeAll(async () => {
 		Parse = await parseRunner.startParseServer();

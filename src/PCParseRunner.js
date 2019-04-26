@@ -26,7 +26,7 @@ class PCParseRunner {
 
 		this.seed = now.getTime();
 		this.parseVersionValue = '3.1.3';
-		this.mainPath = 'src/main.js';
+		this.mainPath = 'main.js';
 	}
 
 	parseVersion(version) {
