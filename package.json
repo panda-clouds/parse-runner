@@ -2,10 +2,10 @@
   "name": "@panda-clouds/parse-runner",
   "scripts": {
     "pretest": "eslint .",
-    "test": "jest"
+    "test": "jest --runInBand"
   },
   "description": "Spins up dockerized Parse Server and Mongo instances for testing",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/panda-clouds/parse-runner.git"
@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@panda-clouds/parse-bash": "^1.1.0",
-    "parse": "^2.1.0"
+    "parse": "^2.3.2"
   },
   "devDependencies": {
     "@panda-clouds/eslint-config-panda-clouds": "^0.9.0",
