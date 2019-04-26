@@ -15,7 +15,6 @@ function runAllTests(version, cloud) {
 				await parseRunner.startParseServer();
 				expect(1).toBe(2);
 			} catch (e) {
-				console.log('error: ' + JSON.stringify(e));
 				await parseRunner.cleanUp();
 				expect(1).toBe(1);
 			}

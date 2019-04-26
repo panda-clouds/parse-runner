@@ -24,14 +24,6 @@ function runAllTests(version, cloud) {
 			expect(result).not.toBe('superman');
 		});
 
-		xit('should read from dynamic class', async () => {
-			expect.assertions(2);
-			const result = await Parse.Cloud.run('useDynamicClass');
-
-			expect(result).toBe('everest');
-			expect(result).not.toBe('superman');
-		});
-
 		it('passes when allowed by beforeSave', async () => {
 			expect.assertions(2);
 			const obj = new Parse.Object('PassClass');
