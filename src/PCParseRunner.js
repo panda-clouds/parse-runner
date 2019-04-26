@@ -100,14 +100,14 @@ class PCParseRunner {
 
 		const OSType = await PCBash.runCommandPromise('uname -s');
 
-		if (OSType === 'Darwin') {
+		// if (OSType === 'Darwin') {
 			// this hack is requried when using Docker for mac
 			this.hostURL = 'host.docker.internal';
 			this.net = '';
-		} else if (OSType === 'Linux') {
-			this.hostURL = 'localhost';
-			this.net = '--net host';
-		}
+		// } else if (OSType === 'Linux') {
+		// 	this.hostURL = 'localhost';
+		// 	this.net = '--net host';
+		// }
 
 		await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir());
 
