@@ -98,12 +98,12 @@ class PCParseRunner {
 			return Parse;
 		}
 
-		const OSType = await PCBash.runCommandPromise('uname -s');
+		// const OSType = await PCBash.runCommandPromise('uname -s');
 
 		// if (OSType === 'Darwin') {
-			// this hack is requried when using Docker for mac
-			this.hostURL = 'host.docker.internal';
-			this.net = '';
+		// this hack is requried when using Docker for mac
+		this.hostURL = 'host.docker.internal';
+		this.net = '';
 		// } else if (OSType === 'Linux') {
 		// 	this.hostURL = 'localhost';
 		// 	this.net = '--net host';
