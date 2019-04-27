@@ -23,8 +23,8 @@ const exampleMasterKey = 'example-master-key';
 class PCParseRunner {
 	constructor() {
 		this.seed = PCParseRunner.randomIntFromInterval(0, 99999);
-		this.mongoPort = PCParseRunner.randomPort(); // 27017; // 
-		this.parsePort = PCParseRunner.randomPort(); // 1337; // 
+		this.mongoPort = PCParseRunner.randomPort(); // 27017;
+		this.parsePort = PCParseRunner.randomPort(); // 1337;
 		this.parseVersionValue = '3.1.3';
 		this.mainPath = 'main.js';
 	}
