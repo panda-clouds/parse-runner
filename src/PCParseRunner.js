@@ -23,8 +23,8 @@ const exampleMasterKey = 'example-master-key';
 class PCParseRunner {
 	constructor() {
 		this.seed = PCParseRunner.randomIntFromInterval(0, 99999);
-		this.mongoPort = 27017; // PCParseRunner.randomPort();
-		this.parsePort = 1337; // PCParseRunner.randomPort();
+		this.mongoPort = PCParseRunner.randomPort(); // 27017; // 
+		this.parsePort = PCParseRunner.randomPort(); // 1337; // 
 		this.parseVersionValue = '3.1.3';
 		this.mainPath = 'main.js';
 	}
@@ -104,7 +104,8 @@ class PCParseRunner {
 			this.net = '';
 		} else if (OSType === 'Linux') {
 			this.hostURL = '127.0.0.1';
-			this.net = '--net host';
+			// this.net = '--net host';
+			this.net = '';
 		}
 
 		await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir());
