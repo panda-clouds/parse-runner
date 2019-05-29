@@ -149,6 +149,20 @@ class PCParseRunner {
 
 		await PCBash.runCommandPromise('pwd');
 
+		// wait for mongo to come up so we don't get a connection error
+		await PCBash.runCommandPromise(
+			'export PC_RUNNER_MONGO_TRIES=10\n' +
+			'until $(curl --output /dev/null --silent --fail http://localhost:' + this.mongoPort + '); do\n' +
+			'    printf \'Waiting for Mongo to come up...\n\'\n' +
+			'    sleep 1\n' +
+			'    ((PC_RUNNER_MONGO_TRIES--))\n' +
+			'    if [ "$PC_RUNNER_MONGO_TRIES" -eq "0" ]; then\n' +
+			'        echo "Timed out";\n' +
+			'        exit 1;\n' +
+			'    fi\n' +
+			'done'
+		);
+
 		await PCBash.runCommandPromise('docker run -d ' + this.net + ' ' +
 		'--name parse-' + this.seed + ' ' +
 		'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
@@ -170,23 +184,10 @@ class PCParseRunner {
 			'done'
 		);
 
-		await PCBash.runCommandPromise(
-			'export PC_RUNNER_MONGO_TRIES=10\n' +
-			'until $(curl --output /dev/null --silent --fail http://localhost:' + this.mongoPort + '); do\n' +
-			'    printf \'Waiting for Mongo to come up...\n\'\n' +
-			'    sleep 1\n' +
-			'    ((PC_RUNNER_MONGO_TRIES--))\n' +
-			'    if [ "$PC_RUNNER_MONGO_TRIES" -eq "0" ]; then\n' +
-			'        echo "Timed out";\n' +
-			'        exit 1;\n' +
-			'    fi\n' +
-			'done'
-		);
-
 		Parse.initialize(exampleAppId, exampleJavascriptKey, exampleMasterKey);
 		Parse.serverURL = 'http://localhost:' + this.parsePort + '/1';
 		// eslint-disable-next-line no-console
-		console.log('Parse Server up and running ' + Parse);
+		console.log('Parse Server up and running');
 
 		return Parse;
 	}
