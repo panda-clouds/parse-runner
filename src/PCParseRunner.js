@@ -23,10 +23,13 @@ const exampleMasterKey = 'example-master-key';
 class PCParseRunner {
 	constructor() {
 		this.seed = PCParseRunner.randomIntFromInterval(0, 99999);
+		// these random port are opened to the public to health check the services
+		// actual container to container communication happens over the network bridge
 		this.mongoPort = PCParseRunner.randomPort(); // 27017;
 		this.parsePort = PCParseRunner.randomPort(); // 1337;
 		this.parseVersionValue = '3.1.3';
 		this.mainPath = 'main.js';
+		this.networkName = 'network-' + this.seed;
 	}
 
 	parseVersion(version) {
@@ -98,14 +101,18 @@ class PCParseRunner {
 
 		const OSType = await PCBash.runCommandPromise('uname -s');
 
+		this.net = '--network ' + this.networkName;
+
 		if (OSType === 'Darwin') {
 			// this hack is requried when using Docker for mac
 			this.hostURL = 'host.docker.internal';
-			this.net = '';
+			this.mongoPortForInterContainerUse = this.mongoPort;
 		} else if (OSType === 'Linux') {
-			this.hostURL = '127.0.0.1';
-			this.net = '--net host';
+			this.hostURL = 'localhost';
+			this.mongoPortForInterContainerUse = 27017;
 		}
+
+		await PCBash.runCommandPromise('docker network create ' + this.networkName);
 
 		await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir());
 
@@ -114,6 +121,8 @@ class PCParseRunner {
 				'-p ' + this.mongoPort + ':27017 ' +
 				'mongo ' +
 				'';
+
+		console.log(makeMongo);
 
 		await PCBash.runCommandPromise(makeMongo);
 
@@ -136,9 +145,8 @@ class PCParseRunner {
 		app.port = this.parsePort;
 		app.mountPath = '/1';
 		// app.databaseName = PCParseRunner.defaultDBName();
-		// derived data
-		// mac hack
-		app.databaseURI = 'mongodb://' + this.hostURL + ':' + this.mongoPort + '/' + PCParseRunner.defaultDBName();
+		// we hardcode 27017 because all C2C communication is linked with a bridge
+		app.databaseURI = 'mongodb://' + this.hostURL + ':27017/' + PCParseRunner.defaultDBName();
 		app.publicServerURL = 'http://localhost:' + app.port + app.mountPath;
 		app.serverURL = app.publicServerURL;
 		app.cloud = '/parse-server/cloud/' + this.mainPath;
@@ -162,13 +170,17 @@ class PCParseRunner {
 			'done'
 		);
 
-		await PCBash.runCommandPromise('docker run -d ' + this.net + ' ' +
+		const makeParse = 'docker run -d ' + this.net + ' ' +
 		'--name parse-' + this.seed + ' ' +
 		'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
 		'-v ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + ':/parse-server/cloud/ ' +
 		'-p ' + this.parsePort + ':1337 ' +
 		'parseplatform/parse-server:' + this.parseVersionValue + ' ' +
-		'/parse-server/configuration.json');
+		'/parse-server/configuration.json';
+
+		await PCBash.runCommandPromise(makeParse);
+
+		console.log(makeParse);
 
 		await PCBash.runCommandPromise(
 			'export PC_RUNNER_PARSE_TRIES=10\n' +
@@ -249,6 +261,12 @@ class PCParseRunner {
 
 		try {
 			await PCBash.runCommandPromise('docker stop mongo-' + this.seed);
+		} catch (e) {
+			// Disregard failures
+		}
+
+		try {
+			await PCBash.runCommandPromise('docker network rm ' + this.networkName);
 		} catch (e) {
 			// Disregard failures
 		}
