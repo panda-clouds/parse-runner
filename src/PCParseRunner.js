@@ -89,12 +89,12 @@ class PCParseRunner {
 		process.env.TESTING = true;
 
 
-		if (process.env.SPEC_USE_EXTERNAL_SERVER) {
-			Parse.initialize(exampleAppId, exampleJavascriptKey, exampleMasterKey);
-			Parse.serverURL = 'http://localhost:' + this.parsePort + '/1';
+		// if (process.env.SPEC_USE_EXTERNAL_SERVER) {
+		// 	Parse.initialize(exampleAppId, exampleJavascriptKey, exampleMasterKey);
+		// 	Parse.serverURL = 'http://localhost:' + this.parsePort + '/1';
 
-			return Parse;
-		}
+		// 	return Parse;
+		// }
 
 		const OSType = await PCBash.runCommandPromise('uname -s');
 
@@ -104,7 +104,7 @@ class PCParseRunner {
 			this.net = '';
 		} else if (OSType === 'Linux') {
 			this.hostURL = '127.0.0.1';
-			// this.net = '--net host';
+			this.net = '--net host';
 			this.net = '';
 		}
 
