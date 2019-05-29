@@ -105,7 +105,6 @@ class PCParseRunner {
 		} else if (OSType === 'Linux') {
 			this.hostURL = '127.0.0.1';
 			this.net = '--net host';
-			this.net = '';
 		}
 
 		await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir());
