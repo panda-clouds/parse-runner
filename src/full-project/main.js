@@ -6,7 +6,7 @@ Parse.Cloud.define('challenge', () => {
 });
 
 Parse.Cloud.define('pwd', () => {
-	const testFolder = '.';
+	const testFolder = './cloud';
 	const fs = require('fs');
 
 	const all = fs.readdirSync(testFolder);
@@ -19,7 +19,7 @@ Parse.Cloud.define('pwd', () => {
 });
 
 Parse.Cloud.define('pwd-node', () => {
-	const testFolder = './node_modules';
+	const testFolder = './cloud/node_modules';
 	const fs = require('fs');
 
 	const all = fs.readdirSync(testFolder);
