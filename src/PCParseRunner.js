@@ -116,14 +116,8 @@ class PCParseRunner {
 		await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
 
 		if (this.projectDirValue) {
-			// const OSType = await PCBash.runCommandPromise('uname -s');
-			// if (OSType === 'Darwin') {
-			// 	await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + '/{.,}* ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
-			// }else if (OSType === 'Linux') {{
 			await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + '/. ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
-			// }else{
-			// 	throw Error('Only Mac and Linux Operating Systems are supported')
-			// }
+			await PCBash.runCommandPromise('cd ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '; npm install');
 		} else if (this.cloudPage) {
 			this.mainPath = 'main.js';
 			await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');
