@@ -116,7 +116,7 @@ class PCParseRunner {
 		await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
 
 		if (this.projectDirValue) {
-			await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + '/. ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
+			await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + '/{.,}* ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
 		} else if (this.cloudPage) {
 			this.mainPath = 'main.js';
 			await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');
