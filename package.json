@@ -2,7 +2,7 @@
   "name": "@panda-clouds/parse-runner",
   "scripts": {
     "pretest": "eslint .",
-    "test": "jest --runInBand"
+    "test": "jest"
   },
   "description": "Spins up dockerized Parse Server and Mongo instances for testing",
   "version": "0.4.0",
