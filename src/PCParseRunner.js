@@ -99,10 +99,6 @@ class PCParseRunner {
 		// 	return Parse;
 		// }
 
-		
-
-		
-
 		// Docker Networking on Mac is messed up
 		// Mac: we use the "random" port to access mongo (host.docker.internal:39194)
 		// vs
@@ -113,6 +109,7 @@ class PCParseRunner {
 		//    or use host.docker.internal
 		// A: on Mac we can't use bridge networking or localhost
 		const OSType = await PCBash.runCommandPromise('uname -s');
+
 		if (OSType === 'Darwin') {
 			// this hack is requried when using Docker for mac
 			this.hostURL = 'host.docker.internal';
