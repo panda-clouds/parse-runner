@@ -23,6 +23,14 @@ describe('full project', () => {
 		expect(result).toBe('everest');
 	});
 
+	it('should return pwd', async () => {
+		expect.assertions(1);
+		const result = await Parse.Cloud.run('pwd');
+
+		console.log(result + JSON.stringify(result));
+		expect(1).toBe(1);
+	});
+
 	it('should read from neighboring file', async () => {
 		expect.assertions(1);
 		const result = await Parse.Cloud.run('other');
