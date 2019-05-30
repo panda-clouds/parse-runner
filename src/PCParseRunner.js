@@ -30,6 +30,7 @@ class PCParseRunner {
 		this.parseVersionValue = '3.1.3';
 		this.mainPath = 'main.js';
 		this.networkName = 'network-' + this.seed;
+		this.networkFlag = '--network ' + this.networkName;
 	}
 
 	parseVersion(version) {
@@ -99,49 +100,25 @@ class PCParseRunner {
 		// 	return Parse;
 		// }
 
-		// Docker Networking on Mac is messed up
-		// Mac: we use the "random" port to access mongo (host.docker.internal:39194)
-		// vs
-		// Linux: we connect the two containers via a bridge network (localhost:27017)
-		// Why not use a uniform way?
-		// A: on Linux the parse server can never connect to the random mongo port
-		//    firewall resrtictions maybe? we can't take those down
-		//    or use host.docker.internal
-		// A: on Mac we can't use bridge networking or localhost
-		// const OSType = await PCBash.runCommandPromise('uname -s');
-
-		// if (OSType === 'Darwin') {
-		// 	// this hack is requried when using Docker for mac
-		// 	this.hostURL = 'host.docker.internal';
-		// 	this.mongoPortForInterContainerUse = this.mongoPort;
-		// 	this.net = '';
-		// } else if (OSType === 'Linux') {
-		// }
-		this.mongoPortForInterContainerUse = 27017;
-		this.net = '--network ' + this.networkName;
-		// on a bridged network we communicate using docker's automatic service discovery
-		// AKA the container name
-		this.hostURL = 'mongo-' + this.seed;
-
 		await PCBash.runCommandPromise('docker network create ' + this.networkName);
 
 		await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir());
 
-		const makeMongo = 'docker run --rm -d ' + this.net + ' ' +
+		const makeMongo = 'docker run --rm -d ' + this.networkFlag + ' ' +
 				'--name mongo-' + this.seed + ' ' +
 				'-p ' + this.mongoPort + ':27017 ' +
 				'mongo ' +
 				'';
 
-		console.log(makeMongo);
-
 		await PCBash.runCommandPromise(makeMongo);
 
+		// make the cloud dir before copying
+		await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
+
 		if (this.projectDirValue) {
-			await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + ' ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
+			await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + '/. ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
 		} else if (this.cloudPage) {
 			this.mainPath = 'main.js';
-			await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
 			await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');
 		}
 
@@ -157,7 +134,7 @@ class PCParseRunner {
 		app.mountPath = '/1';
 		// app.databaseName = PCParseRunner.defaultDBName();
 		// we hardcode 27017 because all C2C communication is linked with a bridge
-		app.databaseURI = 'mongodb://' + this.hostURL + ':' + this.mongoPortForInterContainerUse + '/' + PCParseRunner.defaultDBName();
+		app.databaseURI = 'mongodb://mongo-' + this.seed + ':27017/' + PCParseRunner.defaultDBName();
 		app.publicServerURL = 'http://localhost:' + app.port + app.mountPath;
 		app.serverURL = app.publicServerURL;
 		app.cloud = '/parse-server/cloud/' + this.mainPath;
@@ -181,7 +158,7 @@ class PCParseRunner {
 			'done'
 		);
 
-		const makeParse = 'docker run -d ' + this.net + ' ' +
+		const makeParse = 'docker run -d ' + this.networkFlag + ' ' +
 		'--name parse-' + this.seed + ' ' +
 		'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
 		'-v ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + ':/parse-server/cloud/ ' +
@@ -190,9 +167,6 @@ class PCParseRunner {
 		'/parse-server/configuration.json';
 
 		await PCBash.runCommandPromise(makeParse);
-
-		console.log(makeParse);
-
 		await PCBash.runCommandPromise(
 			'export PC_RUNNER_PARSE_TRIES=10\n' +
 			'until $(curl --output /dev/null --silent --head --fail http://localhost:' + this.parsePort + '/1/health); do\n' +
@@ -200,12 +174,12 @@ class PCParseRunner {
 			'    sleep 1\n' +
 			'    ((PC_RUNNER_PARSE_TRIES--))\n' +
 			'    if [ "$PC_RUNNER_PARSE_TRIES" -eq "0" ]; then\n' +
-			'        echo "Timed out";\n' +
+			'        echo "Timed out. here are logs:";\n' +
+			'        docker logs parse-' + this.seed + ';\n' +
 			'        exit 1;\n' +
 			'    fi\n' +
 			'done'
 		);
-
 		Parse.initialize(exampleAppId, exampleJavascriptKey, exampleMasterKey);
 		Parse.serverURL = 'http://localhost:' + this.parsePort + '/1';
 		// eslint-disable-next-line no-console
