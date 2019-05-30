@@ -9,7 +9,7 @@ Parse.Cloud.define('pwd', () => {
 	const testFolder = '.';
 	const fs = require('fs');
 
-	let all = fs.readdirSync(testFolder)
+	const all = fs.readdirSync(testFolder);
 
 	all.forEach(file => {
 	  console.log(file);
@@ -22,7 +22,7 @@ Parse.Cloud.define('pwd-node', () => {
 	const testFolder = './node_modules';
 	const fs = require('fs');
 
-	let all = fs.readdirSync(testFolder)
+	const all = fs.readdirSync(testFolder);
 
 	all.forEach(file => {
 	  console.log(file);
