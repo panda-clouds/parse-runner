@@ -108,18 +108,20 @@ class PCParseRunner {
 		//    firewall resrtictions maybe? we can't take those down
 		//    or use host.docker.internal
 		// A: on Mac we can't use bridge networking or localhost
-		const OSType = await PCBash.runCommandPromise('uname -s');
+		// const OSType = await PCBash.runCommandPromise('uname -s');
 
-		if (OSType === 'Darwin') {
-			// this hack is requried when using Docker for mac
-			this.hostURL = 'host.docker.internal';
-			this.mongoPortForInterContainerUse = this.mongoPort;
-			this.net = '';
-		} else if (OSType === 'Linux') {
-			this.hostURL = 'localhost';
-			this.mongoPortForInterContainerUse = 27017;
-			this.net = '--network ' + this.networkName;
-		}
+		// if (OSType === 'Darwin') {
+		// 	// this hack is requried when using Docker for mac
+		// 	this.hostURL = 'host.docker.internal';
+		// 	this.mongoPortForInterContainerUse = this.mongoPort;
+		// 	this.net = '';
+		// } else if (OSType === 'Linux') {
+		// }
+		this.mongoPortForInterContainerUse = 27017;
+		this.net = '--network ' + this.networkName;
+		// on a bridged network we communicate using docker's automatic service discovery
+		// AKA the container name
+		this.hostURL = 'mongo-' + this.seed;
 
 		await PCBash.runCommandPromise('docker network create ' + this.networkName);
 
