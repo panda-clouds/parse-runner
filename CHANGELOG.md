@@ -1,8 +1,13 @@
 ## PCParseRunner Changelog
 
+### 0.5.0
+
+- upgraded npm packages
+
 ### 0.4.0
 
 - changed "loadFile" to "projectDir"
+- fixed ci errors
 
 ### 0.3.0
 
