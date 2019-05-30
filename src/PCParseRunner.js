@@ -99,17 +99,29 @@ class PCParseRunner {
 		// 	return Parse;
 		// }
 
+		
+
+		
+
+		// Docker Networking on Mac is messed up
+		// Mac: we use the "random" port to access mongo (host.docker.internal:39194)
+		// vs
+		// Linux: we connect the two containers via a bridge network (localhost:27017)
+		// Why not use a uniform way?
+		// A: on Linux the parse server can never connect to the random mongo port
+		//    firewall resrtictions maybe? we can't take those down
+		//    or use host.docker.internal
+		// A: on Mac we can't use bridge networking or localhost
 		const OSType = await PCBash.runCommandPromise('uname -s');
-
-		this.net = '--network ' + this.networkName;
-
 		if (OSType === 'Darwin') {
 			// this hack is requried when using Docker for mac
 			this.hostURL = 'host.docker.internal';
 			this.mongoPortForInterContainerUse = this.mongoPort;
+			this.net = '';
 		} else if (OSType === 'Linux') {
 			this.hostURL = 'localhost';
 			this.mongoPortForInterContainerUse = 27017;
+			this.net = '--network ' + this.networkName;
 		}
 
 		await PCBash.runCommandPromise('docker network create ' + this.networkName);
@@ -146,7 +158,7 @@ class PCParseRunner {
 		app.mountPath = '/1';
 		// app.databaseName = PCParseRunner.defaultDBName();
 		// we hardcode 27017 because all C2C communication is linked with a bridge
-		app.databaseURI = 'mongodb://' + this.hostURL + ':27017/' + PCParseRunner.defaultDBName();
+		app.databaseURI = 'mongodb://' + this.hostURL + ':' + this.mongoPortForInterContainerUse + '/' + PCParseRunner.defaultDBName();
 		app.publicServerURL = 'http://localhost:' + app.port + app.mountPath;
 		app.serverURL = app.publicServerURL;
 		app.cloud = '/parse-server/cloud/' + this.mainPath;
