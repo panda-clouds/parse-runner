@@ -213,12 +213,6 @@ class PCParseRunner {
 		}
 
 		try {
-			await PCBash.runCommandPromise('rm ' + PCParseRunner.tempDir() + '/main-' + this.seed + '.js');
-		} catch (e) {
-			// Disregard failures
-		}
-
-		try {
 			await PCBash.runCommandPromise('rm ' + PCParseRunner.tempDir() + '/config-' + this.seed);
 		} catch (e) {
 			// Disregard failures
