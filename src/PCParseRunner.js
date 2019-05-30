@@ -225,7 +225,7 @@ class PCParseRunner {
 		}
 
 		try {
-			if (this.projectDirValue) {
+			if (this.projectDirValue || this.cloudPage) {
 				await PCBash.runCommandPromise('rm -r ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
 			}
 		} catch (e) {
