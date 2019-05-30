@@ -31,6 +31,14 @@ describe('full project', () => {
 		expect(1).toBe(1);
 	});
 
+	it('should return pwd-node', async () => {
+		expect.assertions(1);
+		const result = await Parse.Cloud.run('pwd-node');
+
+		console.log(result + JSON.stringify(result));
+		expect(1).toBe(1);
+	});
+
 	it('should read from neighboring file', async () => {
 		expect.assertions(1);
 		const result = await Parse.Cloud.run('other');

@@ -9,9 +9,26 @@ Parse.Cloud.define('pwd', () => {
 	const testFolder = '.';
 	const fs = require('fs');
 
-	fs.readdirSync(testFolder).forEach(file => {
+	let all = fs.readdirSync(testFolder)
+
+	all.forEach(file => {
 	  console.log(file);
 	});
+
+	return all;
+});
+
+Parse.Cloud.define('pwd-node', () => {
+	const testFolder = './node_modules';
+	const fs = require('fs');
+
+	let all = fs.readdirSync(testFolder)
+
+	all.forEach(file => {
+	  console.log(file);
+	});
+
+	return all;
 });
 
 Parse.Cloud.define('mainHasWhitespace', () => {
