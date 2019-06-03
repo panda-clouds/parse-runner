@@ -61,6 +61,11 @@ class PCParseRunner {
 		return 'parse-test';
 	}
 
+	// used for injecting data into mongo before testing
+	mongoURL() {
+		return 'http://localhost:' + this.mongoPort;
+	}
+
 	static tempDir() {
 		// This failed because we use Jenkins in docker.
 		// the 'write' would go into the jenkins container
