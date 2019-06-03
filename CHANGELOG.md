@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.7.0
+
+- changed mongoURL to "mongodb" instead of "http"
+
 ### 0.6.0
 
 - exposed mongoURL

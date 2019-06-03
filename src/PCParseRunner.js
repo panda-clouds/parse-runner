@@ -63,7 +63,7 @@ class PCParseRunner {
 
 	// used for injecting data into mongo before testing
 	mongoURL() {
-		return 'http://localhost:' + this.mongoPort;
+		return 'mongodb://localhost:' + this.mongoPort;
 	}
 
 	static tempDir() {
