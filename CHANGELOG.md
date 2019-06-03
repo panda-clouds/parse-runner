@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.6.0
+
+- exposed mongoURL
+
 ### 0.5.0
 
 - upgraded npm packages
