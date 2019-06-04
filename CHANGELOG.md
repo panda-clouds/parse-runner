@@ -1,5 +1,12 @@
 ## PCParseRunner Changelog
 
+### 0.8.0
+
+- added serverConfig
+- added insertOne
+- added insertMany
+- added No Cloud Code spec and fix
+
 ### 0.7.0
 
 - changed mongoURL to "mongodb" instead of "http"

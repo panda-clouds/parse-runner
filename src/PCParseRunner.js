@@ -1,6 +1,7 @@
 /* global Promise */
 const fs = require('fs');
 const notBothError = 'Only set projectDir OR cloud, Not Both.';
+const MongoClient = require('mongodb').MongoClient;
 
 fs.readFileAsync = filename => {
 	return new Promise((resolve, reject) => {
@@ -31,6 +32,7 @@ class PCParseRunner {
 		this.mainPath = 'main.js';
 		this.networkName = 'network-' + this.seed;
 		this.networkFlag = '--network ' + this.networkName;
+		this.serverConfigObject = {};
 	}
 
 	parseVersion(version) {
@@ -59,6 +61,43 @@ class PCParseRunner {
 
 	static defaultDBName() {
 		return 'parse-test';
+	}
+
+	// convience function
+	async insertOne(className, object) {
+		const connectionString = this.mongoURL();
+		const client = await MongoClient.connect(connectionString,
+			{ setNewUrlParser: true });
+
+		const db = client.db(PCParseRunner.defaultDBName());
+
+		let res = null;
+
+		try {
+			res = await db.collection(className).insertOne(object);
+		} finally {
+			client.close();
+		}
+
+		return res;
+	}
+
+	async insertMany(className, objects) {
+		const connectionString = this.mongoURL();
+		const client = await MongoClient.connect(connectionString,
+			{ setNewUrlParser: true });
+
+		const db = client.db(PCParseRunner.defaultDBName());
+
+		let res = null;
+
+		try {
+			res = await db.collection(className).insertMany(objects);
+		} finally {
+			client.close();
+		}
+
+		return res;
 	}
 
 	// used for injecting data into mongo before testing
@@ -94,6 +133,14 @@ class PCParseRunner {
 	static randomPort() {
 		return PCParseRunner.randomIntFromInterval(1024, 65535);
 	}
+	static test() {
+		return 'hi';
+	}
+
+	serverConfig(config) {
+		this.serverConfigObject = config;
+	}
+
 	async startParseServer() {
 		process.env.TESTING = true;
 
@@ -143,26 +190,38 @@ class PCParseRunner {
 		app.databaseURI = 'mongodb://mongo-' + this.seed + ':27017/' + PCParseRunner.defaultDBName();
 		app.publicServerURL = 'http://localhost:' + app.port + app.mountPath;
 		app.serverURL = app.publicServerURL;
-		app.cloud = '/parse-server/cloud/' + this.mainPath;
-		config.apps = [app];
+
+		if (this.projectDirValue || this.cloudPage) {
+			app.cloud = '/parse-server/cloud/' + this.mainPath;
+		}
+
+		const combinedApp = { ...app, ...this.serverConfigObject };
+
+		console.log('snickers ' + JSON.stringify(combinedApp));
+
+		config.apps = [combinedApp];
 
 		await PCBash.putStringInFile(config, PCParseRunner.tempDir() + '/config-' + this.seed);
 
 		await PCBash.runCommandPromise('pwd');
 
 		// wait for mongo to come up so we don't get a connection error
-		await PCBash.runCommandPromise(
-			'export PC_RUNNER_MONGO_TRIES=10\n' +
-			'until $(curl --output /dev/null --silent --fail http://localhost:' + this.mongoPort + '); do\n' +
-			'    printf \'Waiting for Mongo to come up...\n\'\n' +
-			'    sleep 1\n' +
-			'    ((PC_RUNNER_MONGO_TRIES--))\n' +
-			'    if [ "$PC_RUNNER_MONGO_TRIES" -eq "0" ]; then\n' +
-			'        echo "Timed out";\n' +
-			'        exit 1;\n' +
-			'    fi\n' +
-			'done'
-		);
+		try {
+			await PCBash.runCommandPromise(
+				'export PC_RUNNER_MONGO_TRIES=10\n' +
+				'until $(curl --output /dev/null --silent --fail http://localhost:' + this.mongoPort + '); do\n' +
+				'    printf \'Waiting for Mongo to come up...\n\'\n' +
+				'    sleep 1\n' +
+				'    ((PC_RUNNER_MONGO_TRIES--))\n' +
+				'    if [ "$PC_RUNNER_MONGO_TRIES" -eq "0" ]; then\n' +
+				'        echo "Timed out";\n' +
+				'        exit 1;\n' +
+				'    fi\n' +
+				'done'
+			);
+		} catch (e) {
+			throw new Error('Mongo is in a crash loop. Please try again');
+		}
 
 		const makeParse = 'docker run -d ' + this.networkFlag + ' ' +
 		'--name parse-' + this.seed + ' ' +
@@ -173,19 +232,25 @@ class PCParseRunner {
 		'/parse-server/configuration.json';
 
 		await PCBash.runCommandPromise(makeParse);
-		await PCBash.runCommandPromise(
-			'export PC_RUNNER_PARSE_TRIES=10\n' +
-			'until $(curl --output /dev/null --silent --head --fail http://localhost:' + this.parsePort + '/1/health); do\n' +
-			'    printf \'Waiting for Parse Server to come up...\n\'\n' +
-			'    sleep 1\n' +
-			'    ((PC_RUNNER_PARSE_TRIES--))\n' +
-			'    if [ "$PC_RUNNER_PARSE_TRIES" -eq "0" ]; then\n' +
-			'        echo "Timed out. here are logs:";\n' +
-			'        docker logs parse-' + this.seed + ';\n' +
-			'        exit 1;\n' +
-			'    fi\n' +
-			'done'
-		);
+
+		try {
+			await PCBash.runCommandPromise(
+				'export PC_RUNNER_PARSE_TRIES=10\n' +
+				'until $(curl --output /dev/null --silent --head --fail http://localhost:' + this.parsePort + '/1/health); do\n' +
+				'    printf \'Waiting for Parse Server to come up...\n\'\n' +
+				'    sleep 1\n' +
+				'    ((PC_RUNNER_PARSE_TRIES--))\n' +
+				'    if [ "$PC_RUNNER_PARSE_TRIES" -eq "0" ]; then\n' +
+				'        echo "Timed out. here are logs:";\n' +
+				'        docker logs parse-' + this.seed + ';\n' +
+				'        exit 1;\n' +
+				'    fi\n' +
+				'done'
+			);
+		} catch (e) {
+			throw new Error('Parse Server crashed. Please check logs to debug cloud or configuration issues.');
+		}
+
 		Parse.initialize(exampleAppId, exampleJavascriptKey, exampleMasterKey);
 		Parse.serverURL = 'http://localhost:' + this.parsePort + '/1';
 		// eslint-disable-next-line no-console
