@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.9.0
+
+-fixed port issue where dockerfile overrides the port back to 1337
+
 ### 0.8.0
 
 - added serverConfig
