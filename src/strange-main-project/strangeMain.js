@@ -5,6 +5,12 @@ Parse.Cloud.define('challenge', () => {
 	return 'everest';
 });
 
+Parse.Cloud.define('selfChallenge', async () => {
+	const result = await Parse.Cloud.run('challenge');
+
+	return result;
+});
+
 Parse.Cloud.define('pwd', () => {
 	const testFolder = './cloud';
 	const fs = require('fs');

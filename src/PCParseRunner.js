@@ -209,13 +209,13 @@ class PCParseRunner {
 		app.appId = exampleAppId;
 		app.masterKey = exampleMasterKey;
 		app.javascriptKey = exampleJavascriptKey;
-		app.port = this.parsePort;
+		app.port = 1337; // this.parsePort;
 		app.mountPath = '/1';
 		// app.databaseName = PCParseRunner.defaultDBName();
 		// we hardcode 27017 because all C2C communication is linked with a bridge
 		app.databaseURI = 'mongodb://mongo-' + this.seed + ':27017/' + PCParseRunner.defaultDBName();
 		app.publicServerURL = 'http://localhost:' + app.port + app.mountPath;
-		app.serverURL = app.publicServerURL;
+		app.serverURL = 'http://localhost:1337' + app.mountPath;
 
 		if (this.projectDirValue || this.cloudPage) {
 			app.cloud = '/parse-server/cloud/' + this.mainPath;

@@ -23,6 +23,13 @@ describe('full project', () => {
 		expect(result).toBe('everest');
 	});
 
+	fit('should return self everest', async () => {
+		expect.assertions(1);
+		const result = await Parse.Cloud.run('selfChallenge');
+
+		expect(result).toBe('everest');
+	});
+
 	it('should return pwd', async () => {
 		expect.assertions(1);
 		const result = await Parse.Cloud.run('pwd');
