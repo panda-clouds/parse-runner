@@ -72,11 +72,24 @@ class PCParseRunner {
 		const db = client.db(PCParseRunner.defaultDBName());
 
 		let res = null;
+		let err = null;
 
 		try {
 			res = await db.collection(className).insertOne(object);
+		} catch (e) {
+			console.log('insertOne Failed.' + e.message);
+
+			if (e.message !== null) {
+				err = e.message;
+			} else {
+				err = 'insertOne Failed.';
+			}
 		} finally {
 			client.close();
+		}
+
+		if (err !== null) {
+			throw new Error(err);
 		}
 
 		return res;
@@ -90,11 +103,24 @@ class PCParseRunner {
 		const db = client.db(PCParseRunner.defaultDBName());
 
 		let res = null;
+		let err = null;
 
 		try {
 			res = await db.collection(className).insertMany(objects);
+		} catch (e) {
+			console.log('insertMany Failed.' + e.message);
+
+			if (e.message !== null) {
+				err = e.message;
+			} else {
+				err = 'insertMany Failed.';
+			}
 		} finally {
 			client.close();
+		}
+
+		if (err !== null) {
+			throw new Error(err);
 		}
 
 		return res;

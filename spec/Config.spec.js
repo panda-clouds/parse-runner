@@ -7,7 +7,7 @@ describe('test Mongo inserts', () => {
 		const parseRunner = new PCParseRunner();
 
 		parseRunner.parseVersion('3.1.3');
-		parseRunner.serverConfig({ databaseURI: 'bla-nothing' });
+		parseRunner.serverConfig({ appId: '' });
 
 		try {
 			await parseRunner.startParseServer();

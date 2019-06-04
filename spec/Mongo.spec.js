@@ -19,12 +19,12 @@ describe('test Mongo inserts', () => {
 	}, 1000 * 60 * 2);
 
 	it('should add a user to mongo', async () => {
-		expect.assertions(2);
+		expect.assertions(3);
 
 		const data = { _id: 'ABC',
 			foo: 'bar' };
 
-		parseRunner.insertOne('_User', data);
+		await parseRunner.insertOne('_User', data);
 
 		const query = new Parse.Query('_User');
 		const result = await query.find();
@@ -34,21 +34,47 @@ describe('test Mongo inserts', () => {
 		expect(result[0].get('foo')).toBe('bar');
 	});
 
-	// it('should add many users to mongo', async () => {
-	// 	expect.assertions(2);
+	it('should add many users to mongo', async () => {
+		expect.assertions(2);
 
-	// 	const data = [{ _id: 'DEF',
-	// 		foo: 'bar' },
-	// 	{ _id: 'HIJ',
-	// 		foo: 'bar' }];
+		const data = [{ _id: 'DEF',
+			foo2: 'bar2' },
+		{ _id: 'HIJ',
+			foo2: 'bar2' }];
 
-	// 	parseRunner.insertMany('_User', data);
+		await parseRunner.insertMany('_User', data);
 
-	// 	const query = new Parse.Query('_User');
-	// 	const result = await query.find();
+		const query = new Parse.Query('_User');
+		const result = await query.find();
 
-	// 	expect(result).toHaveLength(1);
-	// 	expect(result[0].id).toBe('DEF');
-	// 	expect(result[0].get('foo')).toBe('bar');
-	// });
+		expect(result).toHaveLength(2);
+		// we don't care "which" is at 0 just that it's one of the two
+		expect(result[0].get('foo2')).toBe('bar2');
+	});
+
+	it('should throw insertOne', async () => {
+		expect.assertions(1);
+
+		const data = 'bad object';
+
+		try {
+			await parseRunner.insertOne('_User', data);
+			expect(1).toBe(2);
+		} catch (e) {
+			expect(e.message).toBe('Cannot create property \'_id\' on string \'bad object\'');
+		}
+	});
+
+	it('should throw insertMany', async () => {
+		expect.assertions(1);
+
+		const data = 'bad object';
+
+		try {
+			await parseRunner.insertMany('_User', data);
+			expect(1).toBe(2);
+		} catch (e) {
+			expect(e.message).toBe('docs parameter must be an array of documents');
+		}
+	});
 });
