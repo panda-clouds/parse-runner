@@ -29,7 +29,7 @@ class PCParseRunner {
 		this.mongoPort = PCParseRunner.randomPort(); // 27017;
 		this.parsePort = PCParseRunner.randomPort(); // 1337;
 		this.parseVersionValue = '3.1.3';
-		this.mainPath = 'main.js';
+		this.mainPath = 'src/main.js';
 		this.networkName = 'network-' + this.seed;
 		this.networkFlag = '--network ' + this.networkName;
 		this.serverConfigObject = {};
@@ -39,6 +39,10 @@ class PCParseRunner {
 		this.parseVersionValue = version;
 	}
 
+	runNpmInstall() {
+		this.shouldNPMInstall = true
+	}
+	
 	main(path) {
 		this.mainPath = path;
 	}
@@ -199,7 +203,9 @@ class PCParseRunner {
 
 		if (this.projectDirValue) {
 			await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + '/. ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
-			await PCBash.runCommandPromise('cd ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '; npm install');
+			if (this.shouldNPMInstall) {
+				await PCBash.runCommandPromise('cd ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '; npm install');
+			}
 		} else if (this.cloudPage) {
 			this.mainPath = 'main.js';
 			await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');

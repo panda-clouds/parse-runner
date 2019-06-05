@@ -5,7 +5,7 @@
     "test": "jest"
   },
   "description": "Spins up dockerized Parse Server and Mongo instances for testing",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/panda-clouds/parse-runner.git"

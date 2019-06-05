@@ -1,5 +1,10 @@
 ## PCParseRunner Changelog
 
+### 0.11.0
+
+- Turned off "npm install" by default
+- changed default location of "main.js"
+
 ### 0.10.0
 
 - added prefill mongo function
