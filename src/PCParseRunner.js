@@ -43,6 +43,10 @@ class PCParseRunner {
 		this.mainPath = path;
 	}
 
+	prefillMongo(fillMongo) {
+		this.prefillMongoValue = fillMongo;
+	}
+
 	projectDir(path) {
 		if (this.cloudPage) {
 			throw new Error(notBothError);
@@ -247,6 +251,10 @@ class PCParseRunner {
 			);
 		} catch (e) {
 			throw new Error('Mongo is in a crash loop. Please try again');
+		}
+
+		if (this.prefillMongoValue) {
+			await this.prefillMongoValue(this);
 		}
 
 		const makeParse = 'docker run -d ' + this.networkFlag + ' ' +
