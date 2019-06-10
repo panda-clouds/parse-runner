@@ -7,9 +7,8 @@ describe('full project', () => {
 	const parseRunner = new PCParseRunner();
 
 	beforeAll(async () => {
-		const results = await PCBash.runCommandPromise('docker build -t test-user/test-repo:5 src/full-project');
+		await PCBash.runCommandPromise('docker build -t test-user/test-repo:5 src/full-project');
 
-		console.log('buuus' + results);
 		process.env.CI_PROD_IMAGE_AND_TAG = 'test-user/test-repo:5';
 		Parse = await parseRunner.startParseServer();
 	}, 1000 * 60 * 2);
@@ -36,16 +35,14 @@ describe('full project', () => {
 		expect.assertions(1);
 		const result = await Parse.Cloud.run('pwd');
 
-		console.log(result + JSON.stringify(result));
-		expect(1).toBe(1);
+		expect(result).toContain('Dockerfile');
 	});
 
 	it('should return pwd-node', async () => {
 		expect.assertions(1);
 		const result = await Parse.Cloud.run('pwd-node');
 
-		console.log(result + JSON.stringify(result));
-		expect(1).toBe(1);
+		expect(result).toContain('@panda-clouds');
 	});
 
 	it('should read from neighboring file', async () => {

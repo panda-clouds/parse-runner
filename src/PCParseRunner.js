@@ -86,8 +86,6 @@ class PCParseRunner {
 		try {
 			res = await db.collection(className).insertOne(object);
 		} catch (e) {
-			console.log('insertOne Failed.' + e.message);
-
 			if (e.message !== null) {
 				err = e.message;
 			} else {
@@ -117,8 +115,6 @@ class PCParseRunner {
 		try {
 			res = await db.collection(className).insertMany(objects);
 		} catch (e) {
-			console.log('insertMany Failed.' + e.message);
-
 			if (e.message !== null) {
 				err = e.message;
 			} else {
@@ -226,8 +222,6 @@ class PCParseRunner {
 
 		const combinedApp = { ...app, ...this.serverConfigObject };
 
-		console.log('snickers ' + JSON.stringify(combinedApp));
-
 		config.apps = [combinedApp];
 
 		await PCBash.putStringInFile(config, PCParseRunner.tempDir() + '/config-' + this.seed);
@@ -326,13 +320,6 @@ class PCParseRunner {
 	}
 
 	async cleanUp() {
-		process.env.TESTING = true;
-
-		if (process.env.SPEC_USE_EXTERNAL_SERVER) {
-			// no clean up
-			return;
-		}
-
 		try {
 			await this.dropDB();
 		} catch (e) {

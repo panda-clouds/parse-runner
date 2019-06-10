@@ -14,6 +14,7 @@ describe('test Mongo inserts', () => {
 			expect(1).toBe(2);
 		} catch (e) {
 			expect(e.message).toBe('Parse Server crashed. Please check logs to debug cloud or configuration issues.');
+			await parseRunner.cleanUp();
 		}
 	}, 2 * 60 * 1000);
 });

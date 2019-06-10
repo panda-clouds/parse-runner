@@ -35,16 +35,14 @@ describe('full project', () => {
 		expect.assertions(1);
 		const result = await Parse.Cloud.run('pwd');
 
-		console.log(result + JSON.stringify(result));
-		expect(1).toBe(1);
+		expect(result).toContain('Dockerfile');
 	});
 
 	it('should return pwd-node', async () => {
 		expect.assertions(1);
 		const result = await Parse.Cloud.run('pwd-node');
 
-		console.log(result + JSON.stringify(result));
-		expect(1).toBe(1);
+		expect(result).toContain('@panda-clouds');
 	});
 
 	it('should read from neighboring file', async () => {
