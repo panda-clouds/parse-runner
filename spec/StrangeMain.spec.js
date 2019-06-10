@@ -7,7 +7,7 @@ describe('full project', () => {
 
 	parseRunner.parseVersion('3.1.3');
 	parseRunner.projectDir('./src/strange-main-project');
-	parseRunner.main('strangeMain.js');
+	parseRunner.main('src/strangeMain.js');
 
 	beforeAll(async () => {
 		Parse = await parseRunner.startParseServer();

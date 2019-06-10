@@ -4,6 +4,9 @@
 
 - Turned off "npm install" by default
 - changed default location of "main.js"
+- fixed tests pointing to main.js
+- checked in node_modules for faster testing
+- added "prodImageAndTag" for exact prod testing
 
 ### 0.10.0
 

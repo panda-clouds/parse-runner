@@ -7,6 +7,7 @@ describe('full project', () => {
 
 	parseRunner.parseVersion('3.1.3');
 	parseRunner.projectDir('./src/full-project');
+	parseRunner.runNpmInstall(true);
 
 	beforeAll(async () => {
 		Parse = await parseRunner.startParseServer();

@@ -39,10 +39,10 @@ class PCParseRunner {
 		this.parseVersionValue = version;
 	}
 
-	runNpmInstall() {
-		this.shouldNPMInstall = true
+	runNpmInstall(bool) {
+		this.shouldNPMInstall = bool;
 	}
-	
+
 	main(path) {
 		this.mainPath = path;
 	}
@@ -64,6 +64,7 @@ class PCParseRunner {
 			throw new Error(notBothError);
 		}
 
+		this.mainPath = 'main.js';
 		this.cloudPage = cloudPage;
 	}
 
@@ -171,6 +172,10 @@ class PCParseRunner {
 		return 'hi';
 	}
 
+	prodImageAndTag() {
+		return process.env.CI_PROD_IMAGE_AND_TAG;
+	}
+
 	serverConfig(config) {
 		this.serverConfigObject = config;
 	}
@@ -198,19 +203,6 @@ class PCParseRunner {
 
 		await PCBash.runCommandPromise(makeMongo);
 
-		// make the cloud dir before copying
-		await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
-
-		if (this.projectDirValue) {
-			await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + '/. ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
-			if (this.shouldNPMInstall) {
-				await PCBash.runCommandPromise('cd ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '; npm install');
-			}
-		} else if (this.cloudPage) {
-			this.mainPath = 'main.js';
-			await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');
-		}
-
 		const config = {};
 
 		config.allowInsecureHTTP = true;
@@ -227,7 +219,8 @@ class PCParseRunner {
 		app.publicServerURL = 'http://localhost:' + app.port + app.mountPath;
 		app.serverURL = 'http://localhost:1337' + app.mountPath;
 
-		if (this.projectDirValue || this.cloudPage) {
+		// cloud page we don't need to set the mainPath
+		if ((this.projectDirValue && this.mainPath && this.mainPath !== '') || this.cloudPage || this.prodImageAndTag()) {
 			app.cloud = '/parse-server/cloud/' + this.mainPath;
 		}
 
@@ -263,15 +256,44 @@ class PCParseRunner {
 			await this.prefillMongoValue(this);
 		}
 
-		const makeParse = 'docker run -d ' + this.networkFlag + ' ' +
-		'--name parse-' + this.seed + ' ' +
-		'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
-		'-v ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + ':/parse-server/cloud/ ' +
-		'-p ' + this.parsePort + ':1337 ' +
-		'parseplatform/parse-server:' + this.parseVersionValue + ' ' +
-		'/parse-server/configuration.json';
 
-		await PCBash.runCommandPromise(makeParse);
+		// This is where CI and Dev testing split
+		// Dev- uses a volume where we transfer the files manually
+		// Prod- we build a docker image once and use the image (containg code) for testing.
+		if (this.prodImageAndTag()) {
+			// in prod we use the prebundled image with the code inside
+			const makeParse = 'docker run -d ' + this.networkFlag + ' ' +
+				'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
+				'--name parse-' + this.seed + ' ' +
+				'-p ' + this.parsePort + ':1337 ' +
+				this.prodImageAndTag() + ' ' +
+				'/parse-server/configuration.json';
+
+			await PCBash.runCommandPromise(makeParse);
+		} else {
+			// In development we use volumes to copy files over
+			await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
+
+			if (this.projectDirValue) {
+				await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + '/. ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
+
+				if (this.shouldNPMInstall) {
+					await PCBash.runCommandPromise('cd ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '; npm install');
+				}
+			} else if (this.cloudPage) {
+				await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');
+			}
+
+			const makeParse = 'docker run -d ' + this.networkFlag + ' ' +
+				'--name parse-' + this.seed + ' ' +
+				'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
+				'-v ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + ':/parse-server/cloud/ ' +
+				'-p ' + this.parsePort + ':1337 ' +
+				'parseplatform/parse-server:' + this.parseVersionValue + ' ' +
+				'/parse-server/configuration.json';
+
+			await PCBash.runCommandPromise(makeParse);
+		}
 
 		try {
 			await PCBash.runCommandPromise(
