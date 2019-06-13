@@ -172,6 +172,17 @@ class PCParseRunner {
 		return process.env.CI_PROD_IMAGE_AND_TAG;
 	}
 
+	// parseRunner.coverageDir(__dirname, '/../coverage');
+	coverageDir(userPath, end) {
+		// escapt spaces from user directory
+		const myPath = userPath.replace(/ /g, '\\ ');
+
+		this.coverageDirValue = myPath + end;// + '-' + this.seed;
+	}
+	coverageDirFull(input) {
+		this.coverageDirValue = input;// + '-' + this.seed;
+	}
+
 	serverConfig(config) {
 		this.serverConfigObject = config;
 	}
@@ -256,9 +267,12 @@ class PCParseRunner {
 		// Prod- we build a docker image once and use the image (containg code) for testing.
 		if (this.prodImageAndTag()) {
 			// in prod we use the prebundled image with the code inside
-			const makeParse = 'docker run -d ' + this.networkFlag + ' ' +
-				'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
-				'--name parse-' + this.seed + ' ' +
+			let makeParse = 'docker run -d ' + this.networkFlag + ' ' +
+				'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ';
+
+			// no code coverage for prod images coverageDirValue
+
+			makeParse = makeParse + '--name parse-' + this.seed + ' ' +
 				'-p ' + this.parsePort + ':1337 ' +
 				this.prodImageAndTag() + ' ' +
 				'/parse-server/configuration.json';
@@ -278,12 +292,19 @@ class PCParseRunner {
 				await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');
 			}
 
-			const makeParse = 'docker run -d ' + this.networkFlag + ' ' +
+			let makeParse = 'docker run -d ' + this.networkFlag + ' ' +
 				'--name parse-' + this.seed + ' ' +
 				'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
-				'-v ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + ':/parse-server/cloud/ ' +
-				'-p ' + this.parsePort + ':1337 ' +
-				'parseplatform/parse-server:' + this.parseVersionValue + ' ' +
+				'-v ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + ':/parse-server/cloud/ ';
+
+			if (this.coverageDirValue) {
+				makeParse = makeParse + '-v ' + this.coverageDirValue + '/web:/parse-server/coverage ';
+				makeParse = makeParse + '-v ' + this.coverageDirValue + '/cache:/parse-server/.nyc_cache ';
+				makeParse = makeParse + '-v ' + this.coverageDirValue + '/temp:/parse-server/.nyc_output ';
+			}
+
+			makeParse = makeParse + '-p ' + this.parsePort + ':1337 ' +
+				'pandaclouds/parse-coverage:' + this.parseVersionValue + ' ' +
 				'/parse-server/configuration.json';
 
 			await PCBash.runCommandPromise(makeParse);
@@ -291,7 +312,7 @@ class PCParseRunner {
 
 		try {
 			await PCBash.runCommandPromise(
-				'export PC_RUNNER_PARSE_TRIES=10\n' +
+				'export PC_RUNNER_PARSE_TRIES=20\n' +
 				'until $(curl --output /dev/null --silent --head --fail http://localhost:' + this.parsePort + '/1/health); do\n' +
 				'    printf \'Waiting for Parse Server to come up...\n\'\n' +
 				'    sleep 1\n' +

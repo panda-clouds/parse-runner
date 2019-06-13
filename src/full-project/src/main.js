@@ -1,6 +1,14 @@
 
 require('./otherFile.js');
 
+Parse.Cloud.define('codeCove1', () => {
+	return 1;
+});
+
+Parse.Cloud.define('codeCove2', () => {
+	return 2;
+});
+
 Parse.Cloud.define('challenge', () => {
 	return 'everest';
 });

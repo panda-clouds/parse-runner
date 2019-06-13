@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.13.0
+
+- added code coverage to the docker container
+
 ### 0.11.0
 
 - Turned off "npm install" by default

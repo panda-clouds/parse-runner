@@ -7,9 +7,9 @@ describe('full project', () => {
 	const parseRunner = new PCParseRunner();
 
 	beforeAll(async () => {
-		await PCBash.runCommandPromise('docker build -t test-user/test-repo:5 src/full-project');
+		await PCBash.runCommandPromise('docker build -t test-user/test-repo:4 src/full-project');
 
-		process.env.CI_PROD_IMAGE_AND_TAG = 'test-user/test-repo:5';
+		process.env.CI_PROD_IMAGE_AND_TAG = 'test-user/test-repo:4';
 		Parse = await parseRunner.startParseServer();
 	}, 1000 * 60 * 2);
 
