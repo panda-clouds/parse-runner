@@ -1,1 +1,0 @@
-{"uuid":"cd5b0663-d0d5-46bb-a42c-6bbd941a7ae6","parent":null,"pid":12,"argv":["/usr/local/bin/node","/usr/local/bin/npm","start","/parse-server/configuration.json"],"execArgv":[],"cwd":"/parse-server","time":1560410613609,"ppid":1,"root":"1daf63bc-aa71-477f-8202-680bc9a3a408","coverageFilename":"/parse-server/.nyc_output/cd5b0663-d0d5-46bb-a42c-6bbd941a7ae6.json","files":[]}

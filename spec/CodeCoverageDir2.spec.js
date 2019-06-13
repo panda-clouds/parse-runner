@@ -6,7 +6,7 @@ let Parse;
 describe('full project', () => {
 	const parseRunner = new PCParseRunner();
 
-	parseRunner.parseVersion('3.1.3');
+	parseRunner.parseVersion('3.4.0');
 	parseRunner.projectDir('./src/full-project');
 	parseRunner.coverageDir(__dirname, '/../src/full-project/coverage');
 
