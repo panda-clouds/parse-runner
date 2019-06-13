@@ -173,15 +173,17 @@ class PCParseRunner {
 		return process.env.CI_PROD_IMAGE_AND_TAG;
 	}
 
-	// parseRunner.coverageDir(__dirname, '/../coverage');
-	coverageDir(userPath, end) {
-		// escapt spaces from user directory
-		const myPath = userPath.replace(/ /g, '\\ ');
+	// parseRunner.coverageDirRel(__dirname + '/../coverage');
+	coverageDir(userPath) {
+		let myPath = userPath;
 
-		this.coverageDirValue = myPath + end;// + '-' + this.seed;
-	}
-	coverageDirFull(input) {
-		this.coverageDirValue = input;// + '-' + this.seed;
+		if (/\s/.test(userPath)) {
+			// the user path has some spaces
+			// escape them
+			myPath = userPath.replace(/ /g, '\\ ');
+		}
+
+		this.coverageDirValue = myPath;
 	}
 
 	serverConfig(config) {

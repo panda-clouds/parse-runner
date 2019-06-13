@@ -1,6 +1,6 @@
 
 const PCParseRunner = require('../src/PCParseRunner.js');
-// const PCBash = require('@panda-clouds/parse-bash');
+const PCBash = require('@panda-clouds/parse-bash');
 let Parse;
 
 describe('full project', () => {
@@ -8,7 +8,7 @@ describe('full project', () => {
 
 	parseRunner.parseVersion('3.4.0');
 	parseRunner.projectDir('./src/full-project');
-	parseRunner.coverageDir(__dirname, '/../src/full-project/coverage');
+	parseRunner.coverageDir('/tmp/testing/coverage');
 
 	beforeAll(async () => {
 		// await PCBash.runCommandPromise('docker build -t test-user/test-repo:2 src/full-project');
@@ -19,6 +19,13 @@ describe('full project', () => {
 
 	afterAll(async () => {
 		await parseRunner.cleanUp();
+
+		try {
+			// this removed the coverage file required for coverageDir1 and coverageDir2
+			await PCBash.runCommandPromise('rm -r ' + PCParseRunner.tempDir() + '/coverage');
+		} catch (e) {
+			// Disregard failures
+		}
 	});
 
 	// this one test is omitted from the CodeCoverageDir1
