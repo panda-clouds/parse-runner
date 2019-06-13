@@ -11,6 +11,7 @@ const crash = bad value!
 `;
 
 	parseRunner.cloud(cloud);
+	parseRunner.timeout(10);
 
 	it('should timeout', async () => {
 		expect.assertions(1);

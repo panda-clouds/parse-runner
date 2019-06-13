@@ -33,6 +33,7 @@ class PCParseRunner {
 		this.networkName = 'network-' + this.seed;
 		this.networkFlag = '--network ' + this.networkName;
 		this.serverConfigObject = {};
+		this.timeoutValue = 20; // default to 20 tries for parse server to start each a 1 second apart
 	}
 
 	parseVersion(version) {
@@ -187,6 +188,10 @@ class PCParseRunner {
 		this.serverConfigObject = config;
 	}
 
+	timeout(value) {
+		this.timeoutValue = value;
+	}
+
 	async startParseServer() {
 		process.env.TESTING = true;
 
@@ -312,7 +317,7 @@ class PCParseRunner {
 
 		try {
 			await PCBash.runCommandPromise(
-				'export PC_RUNNER_PARSE_TRIES=20\n' +
+				'export PC_RUNNER_PARSE_TRIES=' + this.timeoutValue + '\n' +
 				'until $(curl --output /dev/null --silent --head --fail http://localhost:' + this.parsePort + '/1/health); do\n' +
 				'    printf \'Waiting for Parse Server to come up...\n\'\n' +
 				'    sleep 1\n' +
