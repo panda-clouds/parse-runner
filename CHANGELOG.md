@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.14.0
+
+- fixed "setNewUrlParser" to "useNewUrlParser"
+
 ### 0.13.0
 
 - added code coverage to the docker container

@@ -77,7 +77,7 @@ class PCParseRunner {
 	async insertOne(className, object) {
 		const connectionString = this.mongoURL();
 		const client = await MongoClient.connect(connectionString,
-			{ setNewUrlParser: true });
+			{ useNewUrlParser: true });
 
 		const db = client.db(PCParseRunner.defaultDBName());
 
@@ -106,7 +106,7 @@ class PCParseRunner {
 	async insertMany(className, objects) {
 		const connectionString = this.mongoURL();
 		const client = await MongoClient.connect(connectionString,
-			{ setNewUrlParser: true });
+			{ useNewUrlParser: true });
 
 		const db = client.db(PCParseRunner.defaultDBName());
 
