@@ -323,9 +323,9 @@ class PCParseRunner {
 				'-v ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + ':/parse-server/cloud/ ';
 
 			if (this.coverageDirValue) {
-				makeParse = makeParse + '-v ' + this.coverageDirValue + '/web:/parse-server/coverage ';
-				makeParse = makeParse + '-v ' + this.coverageDirValue + '/cache:/parse-server/.nyc_cache ';
-				makeParse = makeParse + '-v ' + this.coverageDirValue + '/temp:/parse-server/.nyc_output ';
+				makeParse = makeParse + '-v ' + this.coverageDirValue + ':/parse-server/coverage ';
+				makeParse = makeParse + '-v ' + this.coverageDirValue + '../.nyc_cache:/parse-server/.nyc_cache ';
+				makeParse = makeParse + '-v ' + this.coverageDirValue + '../.nyc_output:/parse-server/.nyc_output ';
 			}
 
 			makeParse = makeParse + '-p ' + this.parsePort + ':1337 ' +

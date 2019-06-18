@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.17.0
+
+- conformed to nyc standard directories in an attempt to combines reports
+
 ### 0.16.0
 
 - added the ability to inject functions into a spec for testing
