@@ -60,6 +60,14 @@ class PCParseRunner {
 		this.projectDirValue = path;
 	}
 
+	injectCode(codeToInject) {
+		if (this.cloudPage) {
+			throw new Error(notBothError);
+		}
+
+		this.injectCodeValue = codeToInject;
+	}
+
 	cloud(cloudPage) {
 		if (this.projectDirValue) {
 			throw new Error(notBothError);
@@ -291,6 +299,16 @@ class PCParseRunner {
 
 			if (this.projectDirValue) {
 				await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + '/. ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
+
+				if (this.injectCodeValue) {
+					let pathToMain = this.mainPath.split('/');
+
+					pathToMain.pop();
+					pathToMain = pathToMain.join('/');
+					console.log('honeyyyy ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + pathToMain + '/specInjection.js');
+					await PCBash.putStringInFile(this.injectCodeValue, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + pathToMain + '/specInjection.js');
+					await PCBash.runCommandPromise('echo \'require("./specInjection.js");\' >> ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + this.mainPath);
+				}
 
 				if (this.shouldNPMInstall) {
 					await PCBash.runCommandPromise('cd ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '; npm install');
