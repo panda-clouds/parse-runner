@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.16.0
+
+- added the ability to inject functions into a spec for testing
+
 ### 0.15.0
 
 - fixed bug where code coverage was incomplete because "cloud" volume was removed too early
