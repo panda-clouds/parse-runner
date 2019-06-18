@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.15.0
+
+- fixed bug where code coverage was incomplete because "cloud" volume was removed too early
+
 ### 0.14.0
 
 - fixed "setNewUrlParser" to "useNewUrlParser"

@@ -367,14 +367,6 @@ class PCParseRunner {
 		}
 
 		try {
-			if (this.projectDirValue || this.cloudPage) {
-				await PCBash.runCommandPromise('rm -r ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
-			}
-		} catch (e) {
-			// Disregard failures
-		}
-
-		try {
 			await PCBash.runCommandPromise('docker stop parse-' + this.seed);
 		} catch (e) {
 			// Disregard failures
@@ -394,6 +386,15 @@ class PCParseRunner {
 
 		try {
 			await PCBash.runCommandPromise('docker network rm ' + this.networkName);
+		} catch (e) {
+			// Disregard failures
+		}
+
+		// This must be after "docker stop parse-seed" for code coverage to work.
+		try {
+			if (this.projectDirValue || this.cloudPage) {
+				await PCBash.runCommandPromise('rm -r ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
+			}
 		} catch (e) {
 			// Disregard failures
 		}
