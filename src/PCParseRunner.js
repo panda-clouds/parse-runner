@@ -316,8 +316,13 @@ class PCParseRunner {
 							const RunnerHelperClass = require('` + this.helperClassValue + `');
 							Parse.Cloud.define('callHelperClassFunction', request => {
 								const functionName = request.params.HelperFunction;
-								const p = request.params.parameters;
-								return RunnerHelperClass[functionName](...p);
+								if (request.params.parameters) {
+									const p = request.params.parameters;
+									return RunnerHelperClass[functionName](...p);
+								} else {
+									return RunnerHelperClass[functionName]();
+								}
+								
 							});
 							`;
 
