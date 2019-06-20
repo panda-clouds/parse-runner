@@ -23,7 +23,7 @@ describe('full project', () => {
 	parseRunner.helperClass('./NumberHelper.js');
 	parseRunner.parseVersion('3.4.0');
 	parseRunner.projectDir('./src/full-project');
-	parseRunner.coverageDir(__dirname + '/../coverage');
+	// parseRunner.coverageDir(__dirname + '/../coverage');
 	parseRunner.injectCode(`
 		Parse.Cloud.define('injected21', request => {
 			const NumberHelper = require('./NumberHelper.js');

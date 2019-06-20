@@ -43,10 +43,31 @@ describe('full project', () => {
 
 	// This test is not found in CodeCoverageDir2
 	// to test merging of "coverage" data
-	it('should return only in 1', async () => {
+	it('should handle 1 param', async () => {
 		expect.assertions(1);
-		const result = await parseRunner.callHelper('return5');
+		const result = await parseRunner.callHelper('add1Number', [5]);
 
 		expect(result).toBe(5);
+	});
+
+	it('should handle 2 params', async () => {
+		expect.assertions(1);
+		const result = await parseRunner.callHelper('add2Numbers', [5, 7]);
+
+		expect(result).toBe(12);
+	});
+
+	it('should handle 3 params', async () => {
+		expect.assertions(1);
+		const result = await parseRunner.callHelper('add3Numbers', [5, 7, 9]);
+
+		expect(result).toBe(21);
+	});
+
+	it('should handle 10 params', async () => {
+		expect.assertions(1);
+		const result = await parseRunner.callHelper('add10Numbers', [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
+
+		expect(result).toBe(55);
 	});
 });
