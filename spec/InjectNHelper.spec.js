@@ -20,9 +20,17 @@ let Parse;
 describe('full project', () => {
 	const parseRunner = new PCParseRunner();
 
+	parseRunner.helperClass('./NumberHelper.js');
 	parseRunner.parseVersion('3.4.0');
 	parseRunner.projectDir('./src/full-project');
-	parseRunner.coverageDir('/tmp/testing/my-project/coverage');
+	parseRunner.coverageDir(__dirname + '/../coverage');
+	parseRunner.injectCode(`
+		Parse.Cloud.define('injected21', request => {
+			const NumberHelper = require('./NumberHelper.js');
+
+			return NumberHelper.return21();
+		});
+		`);
 	beforeAll(async () => {
 		// await PCBash.runCommandPromise('docker build -t test-user/test-repo:1 src/full-project');
 
@@ -45,83 +53,22 @@ describe('full project', () => {
 	// to test merging of "coverage" data
 	it('should return only in 1', async () => {
 		expect.assertions(1);
-		const result = await Parse.Cloud.run('codeCove1');
+		const result = await parseRunner.callHelper('return5');
 
-		expect(result).toBe(1);
+		expect(result).toBe(5);
 	});
 
-	// it('should return everest', async () => {
-	// 	expect.assertions(1);
-	// 	const result = await Parse.Cloud.run('challenge');
-
-	// 	expect(result).toBe('everest');
-	// });
-
-	it('should return self everest', async () => {
+	it('should return injected21', async () => {
 		expect.assertions(1);
-		const result = await Parse.Cloud.run('selfChallenge');
+		const result = await Parse.Cloud.run('injected21');
 
-		expect(result).toBe('everest');
+		expect(result).toBe(21);
 	});
 
-	it('should return pwd', async () => {
+	it('should return 47', async () => {
 		expect.assertions(1);
-		const result = await Parse.Cloud.run('pwd');
+		const result = await Parse.Cloud.run('NumberHelperReturn47');
 
-		expect(result).toContain('Dockerfile');
-	});
-
-	it('should return pwd-node', async () => {
-		expect.assertions(1);
-		const result = await Parse.Cloud.run('pwd-node');
-
-		expect(result).toContain('@panda-clouds');
-	});
-
-	it('should read from neighboring file', async () => {
-		expect.assertions(1);
-		const result = await Parse.Cloud.run('other');
-
-		expect(result).toBe('file');
-	});
-	it('should read from neighboring file2', async () => {
-		expect.assertions(1);
-		const result = await Parse.Cloud.run('other');
-
-		expect(result).toBe('file');
-	});
-	it('should read from neighboring file3', async () => {
-		expect.assertions(1);
-		const result = await Parse.Cloud.run('other');
-
-		expect(result).toBe('file');
-	});
-	it('should read from neighboring file4', async () => {
-		expect.assertions(1);
-		const result = await Parse.Cloud.run('other');
-
-		expect(result).toBe('file');
-	});
-
-	it('should use node module from main', async () => {
-		expect.assertions(2);
-		const result = await Parse.Cloud.run('mainHasWhitespace');
-
-		expect(result).toBe(true);
-
-		const result2 = await Parse.Cloud.run('mainDoesntHasWhitespace');
-
-		expect(result2).toBe(false);
-	});
-
-	it('should use node module from side', async () => {
-		expect.assertions(2);
-		const result = await Parse.Cloud.run('sideHasWhitespace');
-
-		expect(result).toBe(true);
-
-		const result2 = await Parse.Cloud.run('sideDoesntHasWhitespace');
-
-		expect(result2).toBe(false);
+		expect(result).toBe(47);
 	});
 });

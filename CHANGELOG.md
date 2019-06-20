@@ -1,5 +1,11 @@
 ## PCParseRunner Changelog
 
+### 0.18.0
+
+- added "helperClass" and "callHelper"
+- moved .nyc_output and .nyc_cache to coverage for easy deleting and ignoring since...
+- we gave up on jest direct unit tests because jest deletes the 'coverage' directory each time and can't be configured
+
 ### 0.17.0
 
 - conformed to nyc standard directories in an attempt to combines reports

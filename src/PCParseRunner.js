@@ -202,6 +202,16 @@ class PCParseRunner {
 		this.timeoutValue = value;
 	}
 
+	helperClass(input) {
+		this.helperClassValue = input;
+	}
+	async callHelper(input) {
+		// could also pass classname HelperClassPath: './NumberHelper.js',
+		const result = await Parse.Cloud.run('callHelperClassFunction', { HelperFunction: input });
+
+		return result;
+	}
+
 	async startParseServer() {
 		process.env.TESTING = true;
 
@@ -300,7 +310,31 @@ class PCParseRunner {
 			if (this.projectDirValue) {
 				await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + '/. ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
 
-				if (this.injectCodeValue) {
+				if (this.injectCodeValue || this.helperClassValue) {
+					if (this.injectCodeValue && this.helperClassValue) {
+						// passing as a paramter would also work request.params.HelperClassPath
+						this.injectCodeValue = this.injectCodeValue + `
+							const RunnerHelperClass = require('` + this.helperClassValue + `');
+							Parse.Cloud.define('callHelperClassFunction', request => {
+								const functionName = request.params.HelperFunction;
+
+								return RunnerHelperClass[functionName]();
+							});
+							`;
+					} else if (this.helperClassValue) {
+						// passing as a paramter would also work request.params.HelperClassPath
+						this.injectCodeValue = `
+							const RunnerHelperClass = require('` + this.helperClassValue + `');
+							Parse.Cloud.define('callHelperClassFunction', request => {
+								const functionName = request.params.HelperFunction;
+
+								return RunnerHelperClass[functionName]();
+							});
+							`;
+					} else if (this.injectCodeValue) {
+						// do nothing
+					}
+
 					let pathToMain = this.mainPath.split('/');
 
 					pathToMain.pop();
@@ -324,8 +358,8 @@ class PCParseRunner {
 
 			if (this.coverageDirValue) {
 				makeParse = makeParse + '-v ' + this.coverageDirValue + ':/parse-server/coverage ';
-				makeParse = makeParse + '-v ' + this.coverageDirValue + '../.nyc_cache:/parse-server/.nyc_cache ';
-				makeParse = makeParse + '-v ' + this.coverageDirValue + '../.nyc_output:/parse-server/.nyc_output ';
+				makeParse = makeParse + '-v ' + this.coverageDirValue + '/.nyc_cache:/parse-server/.nyc_cache ';
+				makeParse = makeParse + '-v ' + this.coverageDirValue + '/.nyc_output:/parse-server/.nyc_output ';
 			}
 
 			makeParse = makeParse + '-p ' + this.parsePort + ':1337 ' +

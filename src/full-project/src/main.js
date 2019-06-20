@@ -9,6 +9,12 @@ Parse.Cloud.define('codeCove2', () => {
 	return 2;
 });
 
+Parse.Cloud.define('NumberHelperReturn47', () => {
+	const NumberHelper = require('./NumberHelper.js');
+
+	return NumberHelper.return47();
+});
+
 Parse.Cloud.define('challenge', () => {
 	return 'everest';
 });
