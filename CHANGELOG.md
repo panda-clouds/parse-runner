@@ -1,5 +1,10 @@
 ## PCParseRunner Changelog
 
+### 0.19.0
+
+- bumped default parse-server version to 3.4.4
+- added test for throwing error with a spec helper
+
 ### 0.18.0
 
 - added "helperClass" and "callHelper"
