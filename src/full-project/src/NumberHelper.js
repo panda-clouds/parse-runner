@@ -26,6 +26,10 @@ class NumberHelper {
 	static add10Numbers(a, b, c, d, e, f, g, h, i, j) {
 		return a + b + c + d + e + f + g + h + i + j;
 	}
+
+	static throwBadNumbers() {
+		throw new Error('Bad Numbers!');
+	}
 }
 
 module.exports = NumberHelper;

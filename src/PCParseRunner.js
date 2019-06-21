@@ -28,7 +28,7 @@ class PCParseRunner {
 		// actual container to container communication happens over the network bridge
 		this.mongoPort = PCParseRunner.randomPort(); // 27017;
 		this.parsePort = PCParseRunner.randomPort(); // 1337;
-		this.parseVersionValue = '3.1.3';
+		this.parseVersionValue = '3.4.4'; // change to the latest version when it comes out
 		this.mainPath = 'src/main.js';
 		this.networkName = 'network-' + this.seed;
 		this.networkFlag = '--network ' + this.networkName;
