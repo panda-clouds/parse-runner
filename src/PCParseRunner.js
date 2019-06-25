@@ -34,6 +34,11 @@ class PCParseRunner {
 		this.networkFlag = '--network ' + this.networkName;
 		this.serverConfigObject = {};
 		this.timeoutValue = 20; // default to 20 tries for parse server to start each a 1 second apart
+		this.collectCoverageValue = true;
+	}
+
+	collectCoverage(bool) {
+		this.collectCoverageValue = bool;
 	}
 
 	parseVersion(version) {
@@ -52,12 +57,24 @@ class PCParseRunner {
 		this.prefillMongoValue = fillMongo;
 	}
 
-	projectDir(path) {
+	projectDir(userPath) {
 		if (this.cloudPage) {
 			throw new Error(notBothError);
 		}
 
-		this.projectDirValue = path;
+		if (userPath.split('/')[0] === '.') {
+			throw new Error('projectDir needs a full path, you provided a local one. Please use "parseRunner.projectDir(__dirname);" or something like "parseRunner.projectDir(__dirname + \'/../src/full-project\');"');
+		}
+
+		let myPath = userPath;
+
+		if (/\s/.test(userPath)) {
+			// the user path has some spaces
+			// escape them
+			myPath = userPath.replace(/ /g, '\\ ');
+		}
+
+		this.projectDirValue = myPath;
 	}
 
 	injectCode(codeToInject) {
@@ -179,19 +196,6 @@ class PCParseRunner {
 
 	prodImageAndTag() {
 		return process.env.CI_PROD_IMAGE_AND_TAG;
-	}
-
-	// parseRunner.coverageDirRel(__dirname + '/../coverage');
-	coverageDir(userPath) {
-		let myPath = userPath;
-
-		if (/\s/.test(userPath)) {
-			// the user path has some spaces
-			// escape them
-			myPath = userPath.replace(/ /g, '\\ ');
-		}
-
-		this.coverageDirValue = myPath;
 	}
 
 	serverConfig(config) {
@@ -340,7 +344,6 @@ class PCParseRunner {
 
 					pathToMain.pop();
 					pathToMain = pathToMain.join('/');
-					console.log('honeyyyy ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + pathToMain + '/specInjection.js');
 					await PCBash.putStringInFile(this.injectCodeValue, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + pathToMain + '/specInjection.js');
 					await PCBash.runCommandPromise('echo \'require("./specInjection.js");\' >> ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + this.mainPath);
 				}
@@ -357,10 +360,13 @@ class PCParseRunner {
 				'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
 				'-v ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + ':/parse-server/cloud/ ';
 
-			if (this.coverageDirValue) {
-				makeParse = makeParse + '-v ' + this.coverageDirValue + ':/parse-server/coverage ';
-				makeParse = makeParse + '-v ' + this.coverageDirValue + '/../.nyc_cache:/parse-server/.nyc_cache ';
-				makeParse = makeParse + '-v ' + this.coverageDirValue + '/../.nyc_output:/parse-server/.nyc_output ';
+			if (this.collectCoverageValue && this.projectDirValue) {
+				// ubuntu fails without this manual command
+				await PCBash.runCommandPromise('mkdir -p ' + this.projectDirValue + '/.nyc_output/processinfo');
+
+				makeParse = makeParse + '-v ' + this.projectDirValue + '/coverage:/parse-server/coverage ';
+				makeParse = makeParse + '-v ' + this.projectDirValue + '/.nyc_cache:/parse-server/.nyc_cache ';
+				makeParse = makeParse + '-v ' + this.projectDirValue + '/.nyc_output:/parse-server/.nyc_output ';
 			}
 
 			makeParse = makeParse + '-p ' + this.parsePort + ':1337 ' +

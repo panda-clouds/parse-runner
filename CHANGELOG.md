@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.20.0
+
+- removed coverageDir and replaced with only a bool that turns coverage off
+
 ### 0.19.0
 
 - bumped default parse-server version to 3.4.4

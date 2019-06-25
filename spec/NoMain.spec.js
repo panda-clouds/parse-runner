@@ -6,7 +6,8 @@ describe('full project', () => {
 	const parseRunner = new PCParseRunner();
 
 	parseRunner.parseVersion('3.1.3');
-	parseRunner.projectDir('./src/full-project');
+	parseRunner.projectDir(__dirname + '/../src/full-project');
+	parseRunner.collectCoverage(false);
 	parseRunner.main(''); // this should stop the project from being loaded
 
 	beforeAll(async () => {

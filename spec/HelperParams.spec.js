@@ -21,7 +21,8 @@ describe('full project', () => {
 
 	parseRunner.helperClass('./NumberHelper.js');
 	parseRunner.parseVersion('3.4.0');
-	parseRunner.projectDir('./src/full-project');
+	parseRunner.projectDir(__dirname + '/../src/full-project');
+	parseRunner.collectCoverage(false);
 	// parseRunner.coverageDir(__dirname + '/../coverage');
 	beforeAll(async () => {
 		// await PCBash.runCommandPromise('docker build -t test-user/test-repo:1 src/full-project');

@@ -21,8 +21,8 @@ describe('helper classes throwing errors ', () => {
 
 	parseRunner.helperClass('./NumberHelper.js');
 	parseRunner.parseVersion('3.4.0');
-	parseRunner.projectDir('./src/full-project');
-	// parseRunner.coverageDir(__dirname + '/../coverage');
+	parseRunner.projectDir(__dirname + '/../src/full-project');
+	parseRunner.collectCoverage(false);
 	beforeAll(async () => {
 		// await PCBash.runCommandPromise('docker build -t test-user/test-repo:1 src/full-project');
 

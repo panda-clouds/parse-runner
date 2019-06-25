@@ -6,7 +6,8 @@ describe('full project', () => {
 	const parseRunner = new PCParseRunner();
 
 	parseRunner.parseVersion('3.1.3');
-	parseRunner.projectDir('./src/strange-main-project');
+	parseRunner.projectDir(__dirname + '/../src/strange-main-project');
+	parseRunner.collectCoverage(false);
 	parseRunner.main('src/strangeMain.js');
 
 	beforeAll(async () => {
