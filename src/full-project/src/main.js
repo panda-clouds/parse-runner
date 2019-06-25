@@ -9,6 +9,10 @@ Parse.Cloud.define('codeCove2', () => {
 	return 2;
 });
 
+Parse.Cloud.define('now', () => {
+	return new Date().getTime();
+});
+
 Parse.Cloud.define('NumberHelperReturn47', () => {
 	const NumberHelper = require('./NumberHelper.js');
 

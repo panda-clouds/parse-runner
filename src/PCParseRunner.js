@@ -37,6 +37,33 @@ class PCParseRunner {
 		this.collectCoverageValue = true;
 	}
 
+	async setClock(time) {
+		let currentTime;
+
+		if (!currentTime && time.getTime) {
+			currentTime = time.getTime();
+		}
+
+		console.log('currentTimeA: ' + currentTime);
+
+		if (!currentTime && time.toDate) {
+			currentTime = time.toDate().getTime();
+		}
+
+		console.log('currentTimeB: ' + currentTime);
+		// could also pass classname HelperClassPath: './NumberHelper.js',
+		const result = await Parse.Cloud.run('specSetCurrentTime', { currentTime: currentTime });
+
+		return result;
+	}
+
+	async resetClock() {
+		// could also pass classname HelperClassPath: './NumberHelper.js',
+		const result = await Parse.Cloud.run('specResetCurrentTime');
+
+		return result;
+	}
+
 	collectCoverage(bool) {
 		this.collectCoverageValue = bool;
 	}
@@ -315,38 +342,50 @@ class PCParseRunner {
 			if (this.projectDirValue) {
 				await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + '/. ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
 
-				if (this.injectCodeValue || this.helperClassValue) {
-					const helperFunction = `
-							const RunnerHelperClass = require('` + this.helperClassValue + `');
-							Parse.Cloud.define('callHelperClassFunction', request => {
-								const functionName = request.params.HelperFunction;
-								if (request.params.parameters) {
-									const p = request.params.parameters;
-									return RunnerHelperClass[functionName](...p);
-								} else {
-									return RunnerHelperClass[functionName]();
-								}
-								
+				let finalInjection = '';
+				const clockFunction = `
+							var MockDate = require('mockdate');
+							Parse.Cloud.define('specSetCurrentTime', request => {
+								const time = request.params.currentTime
+								MockDate.set(new Date(time))
+							});
+
+							Parse.Cloud.define('specResetCurrentTime', request => {
+								MockDate.reset();
 							});
 							`;
+				const helperFunction = `
+						const RunnerHelperClass = require('` + this.helperClassValue + `');
+						Parse.Cloud.define('callHelperClassFunction', request => {
+							const functionName = request.params.HelperFunction;
+							if (request.params.parameters) {
+								const p = request.params.parameters;
+								return RunnerHelperClass[functionName](...p);
+							} else {
+								return RunnerHelperClass[functionName]();
+							}
+							
+						});
+						`;
 
-					if (this.injectCodeValue && this.helperClassValue) {
-						// passing as a paramter would also work request.params.HelperClassPath
-						this.injectCodeValue = this.injectCodeValue + helperFunction;
-					} else if (this.helperClassValue) {
-						// passing as a paramter would also work request.params.HelperClassPath
-						this.injectCodeValue = helperFunction;
-					} else if (this.injectCodeValue) {
-						// do nothing
-					}
-
-					let pathToMain = this.mainPath.split('/');
-
-					pathToMain.pop();
-					pathToMain = pathToMain.join('/');
-					await PCBash.putStringInFile(this.injectCodeValue, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + pathToMain + '/specInjection.js');
-					await PCBash.runCommandPromise('echo \'require("./specInjection.js");\' >> ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + this.mainPath);
+				if (this.injectCodeValue && this.helperClassValue) {
+					// passing as a paramter would also work request.params.HelperClassPath
+					finalInjection = clockFunction + this.injectCodeValue + helperFunction;
+				} else if (this.helperClassValue) {
+					// passing as a paramter would also work request.params.HelperClassPath
+					finalInjection = clockFunction + helperFunction;
+				} else if (this.injectCodeValue) {
+					finalInjection = clockFunction + this.injectCodeValue;
+				} else {
+					finalInjection = clockFunction;
 				}
+
+				let pathToMain = this.mainPath.split('/');
+
+				pathToMain.pop();
+				pathToMain = pathToMain.join('/');
+				await PCBash.putStringInFile(finalInjection, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + pathToMain + '/specInjection.js');
+				await PCBash.runCommandPromise('echo \'require("./specInjection.js");\' >> ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + this.mainPath);
 
 				if (this.shouldNPMInstall) {
 					await PCBash.runCommandPromise('cd ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '; npm install');

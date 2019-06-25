@@ -1,5 +1,10 @@
 ## PCParseRunner Changelog
 
+### 0.21.0
+
+- added spec for Clock functionality added to Parse-Coverage
+- added setClock and resetClock
+
 ### 0.20.0
 
 - removed coverageDir and replaced with only a bool that turns coverage off
