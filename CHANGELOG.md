@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.22.0
+
+- added getClock()
+
 ### 0.21.0
 
 - added spec for Clock functionality added to Parse-Coverage

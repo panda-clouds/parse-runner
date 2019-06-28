@@ -18,11 +18,15 @@ describe('full project', () => {
 	});
 
 	it('should return now', async () => {
-		expect.assertions(2);
+		expect.assertions(3);
 		await parseRunner.setClock(new Date(1561494028357));
 		const result = await Parse.Cloud.run('now');
 
 		expect(result).toBe(1561494028357);
+
+		const result3 = await parseRunner.getClock();
+
+		expect(result3).toBe(1561494028357);
 
 		await parseRunner.resetClock();
 
@@ -34,11 +38,15 @@ describe('full project', () => {
 	});
 
 	it('should return now with moment', async () => {
-		expect.assertions(2);
+		expect.assertions(3);
 		await parseRunner.setClock(moment(1561494021234));
 		const result = await Parse.Cloud.run('now');
 
 		expect(result).toBe(1561494021234);
+
+		const result3 = await parseRunner.getClock();
+
+		expect(result3).toBe(1561494021234);
 
 		await parseRunner.resetClock();
 

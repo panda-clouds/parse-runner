@@ -37,6 +37,13 @@ class PCParseRunner {
 		this.collectCoverageValue = true;
 	}
 
+	async getClock() {
+		// could also pass classname HelperClassPath: './NumberHelper.js',
+		const result = await Parse.Cloud.run('specGetCurrentTime');
+
+		return result;
+	}
+
 	async setClock(time) {
 		let currentTime;
 
@@ -345,6 +352,11 @@ class PCParseRunner {
 				let finalInjection = '';
 				const clockFunction = `
 							var MockDate = require('mockdate');
+							
+							Parse.Cloud.define('specGetCurrentTime', request => {
+								return new Date().getTime();
+							});
+
 							Parse.Cloud.define('specSetCurrentTime', request => {
 								const time = request.params.currentTime
 								MockDate.set(new Date(time))
