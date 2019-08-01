@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.23.0
+
+- added inflating of pointers and date objects from a JSON file.
+
 ### 0.22.0
 
 - added getClock()
