@@ -1,5 +1,8 @@
 ## PCParseRunner Changelog
 
+### 0.24.0
+- npm audit fix
+
 ### 0.23.0
 
 - added inflating of pointers and date objects from a JSON file.
