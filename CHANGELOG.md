@@ -1,6 +1,7 @@
 ## PCParseRunner Changelog
 
 ### 0.24.0
+- Moved moment from "dev dep" to "dep"
 - npm audit fix
 
 ### 0.23.0
