@@ -1,5 +1,8 @@
 ## PCParseRunner Changelog
 
+### 0.24.1
+- Fixed insertOne failing when a property is set to "null"
+
 ### 0.24.0
 - Moved moment from "dev dep" to "dep"
 - npm audit fix

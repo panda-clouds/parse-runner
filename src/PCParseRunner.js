@@ -184,16 +184,18 @@ class PCParseRunner {
 			const oldValue = object[thisKey];
 			let newValue = oldValue;
 
-			if (PCParseRunner.isISO8601withTimeZone(oldValue)) {
-				newValue = new Date(oldValue);
-			}
+			if (oldValue) {
+				if (PCParseRunner.isISO8601withTimeZone(oldValue)) {
+					newValue = new Date(oldValue);
+				}
 
-			if (oldValue.__type && oldValue.__type === 'Date' && oldValue.iso) {
-				newValue = new Date(oldValue.iso);
-			}
+				if (oldValue.__type && oldValue.__type === 'Date' && oldValue.iso) {
+					newValue = new Date(oldValue.iso);
+				}
 
-			if (oldValue.__type && oldValue.__type === 'Pointer' && oldValue.className && oldValue.objectId) {
-				newValue = oldValue.className + '$' + oldValue.objectId;
+				if (oldValue.__type && oldValue.__type === 'Pointer' && oldValue.className && oldValue.objectId) {
+					newValue = oldValue.className + '$' + oldValue.objectId;
+				}
 			}
 
 			returnObject[thisKey] = newValue;

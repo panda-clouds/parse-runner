@@ -1,11 +1,11 @@
 {
   "name": "@panda-clouds/parse-runner",
   "scripts": {
-    "pretest": "eslint .",
+    "pretest": "eslint --fix .",
     "test": "jest"
   },
   "description": "Spins up dockerized Parse Server and Mongo instances for testing",
-  "version": "0.24.0",
+  "version": "0.24.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/panda-clouds/parse-runner.git"
