@@ -1,5 +1,8 @@
 ## PCParseRunner Changelog
 
+### 0.25.0
+- added Push injection
+
 ### 0.24.1
 - Fixed insertOne failing when a property is set to "null"
 

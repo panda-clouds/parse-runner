@@ -124,6 +124,10 @@ class PCParseRunner {
 		this.injectCodeValue = codeToInject;
 	}
 
+	rawPush(codeToInject) {
+		this.rawPushValue = codeToInject;
+	}
+
 	cloud(cloudPage) {
 		if (this.projectDirValue) {
 			throw new Error(notBothError);
@@ -413,6 +417,12 @@ class PCParseRunner {
 			app.cloud = '/parse-server/cloud/' + this.mainPath;
 		}
 
+		if (this.rawPushValue) {
+			app.push = {
+				adapter: '/parse-server/cloud/' + this.internalMainDir() + '/specInjectionPushModule.js',
+			};
+		}
+
 		const combinedApp = { ...app, ...this.serverConfigObject };
 
 		config.apps = [combinedApp];
@@ -465,7 +475,7 @@ class PCParseRunner {
 			if (this.projectDirValue) {
 				await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + '/. ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
 
-				let finalInjection = '';
+				// add clock function
 				const clockFunction = `
 							var MockDate = require('mockdate');
 							
@@ -482,38 +492,36 @@ class PCParseRunner {
 								MockDate.reset();
 							});
 							`;
-				const helperFunction = `
-						const RunnerHelperClass = require('` + this.helperClassValue + `');
-						Parse.Cloud.define('callHelperClassFunction', request => {
-							const functionName = request.params.HelperFunction;
-							if (request.params.parameters) {
-								const p = request.params.parameters;
-								return RunnerHelperClass[functionName](...p);
-							} else {
-								return RunnerHelperClass[functionName]();
-							}
-							
-						});
-						`;
 
-				if (this.injectCodeValue && this.helperClassValue) {
-					// passing as a paramter would also work request.params.HelperClassPath
-					finalInjection = clockFunction + this.injectCodeValue + helperFunction;
-				} else if (this.helperClassValue) {
-					// passing as a paramter would also work request.params.HelperClassPath
-					finalInjection = clockFunction + helperFunction;
-				} else if (this.injectCodeValue) {
-					finalInjection = clockFunction + this.injectCodeValue;
-				} else {
-					finalInjection = clockFunction;
+				await this.addFileToProject(clockFunction, 'injectedPushConfig.js');
+
+
+				if (this.helperClassValue) {
+					const helperFunction = `
+							const RunnerHelperClass = require('` + this.helperClassValue + `');
+							Parse.Cloud.define('callHelperClassFunction', request => {
+								const functionName = request.params.HelperFunction;
+								if (request.params.parameters) {
+									const p = request.params.parameters;
+									return RunnerHelperClass[functionName](...p);
+								} else {
+									return RunnerHelperClass[functionName]();
+								}
+								
+							});
+							`;
+
+					await this.addFileToProject(helperFunction, 'specInjectionHelperClass.js');
 				}
 
-				let pathToMain = this.mainPath.split('/');
+				if (this.injectCodeValue) {
+					await this.addFileToProject(this.injectCodeValue, 'specInjectionUserDefinedCode.js');
+				}
 
-				pathToMain.pop();
-				pathToMain = pathToMain.join('/');
-				await PCBash.putStringInFile(finalInjection, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + pathToMain + '/specInjection.js');
-				await PCBash.runCommandPromise('echo \'require("./specInjection.js");\' >> ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + this.mainPath);
+				if (this.rawPushValue) {
+					await this.addFileToProject(this.rawPushValue, 'specInjectionPushModule.js');
+				}
+
 
 				if (this.shouldNPMInstall) {
 					await PCBash.runCommandPromise('cd ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '; npm install');
@@ -569,6 +577,19 @@ class PCParseRunner {
 		return Parse;
 	}
 
+	internalMainDir() {
+		let pathToMain = this.mainPath.split('/');
+
+		pathToMain.pop();
+		pathToMain = pathToMain.join('/');
+
+		return pathToMain;
+	}
+
+	async addFileToProject(code, fileName) {
+		await PCBash.putStringInFile(code, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + this.internalMainDir() + '/' + fileName);
+		await PCBash.runCommandPromise('echo \'require("./' + fileName + '");\' >> ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + this.mainPath);
+	}
 	async dropDB() {
 		await PCBash.runCommandPromise('docker exec mongo-' + this.seed + ' mongo ' + PCParseRunner.defaultDBName() + ' --eval "db.dropDatabase()"');
 	}
