@@ -28,40 +28,7 @@ describe('full project', () => {
 
 	parseRunner.projectDir(__dirname + '/../src/full-project');
 	parseRunner.prefillMongo();
-	parseRunner.loadPushAdapter(`
-module.exports = function(options) {
-  return {
-    options: options,
-    send: function(options,installs,pushStatus) {
-    	// Parse is attempting to send a push
-    	// const pushStatus
-    	console.log("Parse is attemping to send a push" + JSON.stringify(options));
-    	return Promise.resolve([{
-	      transmitted: true,
-	      device: {
-	        deviceToken: 'device_token_5',
-	        deviceType: 'ios'
-	      }
-	    },{
-	      transmitted: true,
-	      device: {
-	        deviceToken: 'device_token_6',
-	        deviceType: 'ios'
-	      }
-	    },{
-	      transmitted: true,
-	      device: {
-	        deviceToken: 'device_token_999',
-	        deviceType: 'android'
-	      }
-	    }]);
-    },
-    getValidPushTypes: function() {
-      return ["ios","android"];
-    },
-  };
-};
-		`);
+	parseRunner.loadPushAdapter();
 
 	beforeAll(async () => {
 		Parse = await parseRunner.startParseServer();
@@ -84,7 +51,7 @@ module.exports = function(options) {
 		const first = await statusQuery.first({ useMasterKey: true });
 
 		expect(first.get('status')).toBe('succeeded');
-		expect(first.get('numSent')).toBe(3);
-		expect(first.get('sentPerType').ios).toBe(2);
+		expect(first.get('numSent')).toBe(2);
+		expect(first.get('sentPerType').ios).toBe(1);
 	});
 });

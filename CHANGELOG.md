@@ -1,5 +1,8 @@
 ## PCParseRunner Changelog
 
+### 0.26.0
+- added loadDefaultPushAdapter
+
 ### 0.25.0
 - added Push injection
 

@@ -124,8 +124,39 @@ class PCParseRunner {
 		this.injectCodeValue = codeToInject;
 	}
 
-	rawPush(codeToInject) {
-		this.rawPushValue = codeToInject;
+	loadPushAdapter(codeToInject) {
+		if (codeToInject) {
+			this.rawPushValue = codeToInject;
+		} else {
+			this.rawPushValue = `
+module.exports = function(options) {
+  return {
+    options: options,
+    send: function(options,installs,pushStatus) {
+    	// Parse is attempting to send a push
+    	// const pushStatus
+    	console.log("Parse is attemping to send a push" + JSON.stringify(options));
+    	return Promise.resolve([{
+	      transmitted: true,
+	      device: {
+	        deviceToken: 'device_token_1',
+	        deviceType: 'ios'
+	      }
+	    },{
+	      transmitted: true,
+	      device: {
+	        deviceToken: 'device_token_2',
+	        deviceType: 'android'
+	      }
+	    }]);
+    },
+    getValidPushTypes: function() {
+      return ["ios","android"];
+    },
+  };
+};
+		`;
+		}
 	}
 
 	cloud(cloudPage) {
