@@ -45,20 +45,25 @@ class PCParseRunner {
 		return result;
 	}
 
-	async setClock(time) {
+	async setClock(time, debug = false) {
 		let currentTime;
 
 		if (!currentTime && time.getTime) {
 			currentTime = time.getTime();
 		}
 
-		console.log('currentTimeA: ' + currentTime);
+		if (debug) {
+			console.log('currentTimeA: ' + currentTime);
+		}
 
 		if (!currentTime && time.toDate) {
 			currentTime = time.toDate().getTime();
 		}
 
-		console.log('currentTimeB: ' + currentTime);
+		if (debug) {
+			console.log('currentTimeB: ' + currentTime);
+		}
+
 		// could also pass classname HelperClassPath: './NumberHelper.js',
 		const result = await Parse.Cloud.run('specSetCurrentTime', { currentTime: currentTime });
 
@@ -341,6 +346,12 @@ module.exports = function(options) {
 		}
 
 		return res;
+	}
+
+	async printAll(classname, query = {}) {
+		const items = await this.find(classname, query);
+
+		console.log(JSON.stringify(items, null, 2));
 	}
 
 	// used for injecting data into mongo before testing
