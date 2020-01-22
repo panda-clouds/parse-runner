@@ -524,8 +524,7 @@ module.exports = function(options) {
 							});
 							`;
 
-				await this.addFileToProject(clockFunction, 'injectedPushConfig.js');
-
+				await this.addFileToProject(clockFunction, 'specInjectionPushConfig.js');
 
 				if (this.helperClassValue) {
 					const helperFunction = `
