@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.29.0
+- bumped default parse server to 3.10.0
+- changed timeout from 20 seconds to 30
+
 ### 0.28.0
 - Renamed "injectedPushConfig" to "specInjectionPushConfig" so parse coverage could ignore with wildcard
 

@@ -29,12 +29,12 @@ class PCParseRunner {
 		// actual container to container communication happens over the network bridge
 		this.mongoPort = PCParseRunner.randomPort(); // 27017;
 		this.parsePort = PCParseRunner.randomPort(); // 1337;
-		this.parseVersionValue = '3.4.4'; // change to the latest version when it comes out
+		this.parseVersionValue = '3.10.0'; // change to the latest version when it comes out
 		this.mainPath = 'src/main.js';
 		this.networkName = 'network-' + this.seed;
 		this.networkFlag = '--network ' + this.networkName;
 		this.serverConfigObject = {};
-		this.timeoutValue = 20; // default to 20 tries for parse server to start each a 1 second apart
+		this.timeoutValue = 30; // default to 30 tries for parse server to start each a 1 second apart
 		this.collectCoverageValue = true;
 	}
 
