@@ -634,8 +634,8 @@ module.exports = function(options) {
 	async dropDB() {
 		await PCBash.runCommandPromise('docker exec mongo-' + this.seed + ' mongo ' + PCParseRunner.defaultDBName() + ' --eval "db.dropDatabase()"');
 	}
-	async nukeParseRunnerAllContainers(){
-		return `docker ps --filter "label=parse-runner" | grep -v CONTAINER | awk '{print $1}' | xargs --no-run-if-empty sudo docker rm -f`
+	nukeParseRunnerAllContainers() {
+		return 'docker ps --filter "label=parse-runner" | grep -v CONTAINER | awk \'{print $1}\' | xargs --no-run-if-empty sudo docker rm -f';
 	}
 	async cleanUp() {
 		try {
