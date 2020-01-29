@@ -429,7 +429,7 @@ module.exports = function(options) {
 
 		await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir());
 
-		const makeMongo = 'docker run --rm -d ' + this.networkFlag + ' ' +
+		const makeMongo = 'docker run --rm -d --label "parse-runner" ' + this.networkFlag + ' ' +
 				'--name mongo-' + this.seed + ' ' +
 				'-p ' + this.mongoPort + ':27017 ' +
 				'mongo ' +
@@ -499,7 +499,7 @@ module.exports = function(options) {
 		// Prod- we build a docker image once and use the image (containg code) for testing.
 		if (this.prodImageAndTag()) {
 			// in prod we use the prebundled image with the code inside
-			let makeParse = 'docker run -d ' + this.networkFlag + ' ' +
+			let makeParse = 'docker run --rm -d --label "parse-runner" ' + this.networkFlag + ' ' +
 				'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ';
 
 			// no code coverage for prod images coverageDirValue
@@ -634,7 +634,9 @@ module.exports = function(options) {
 	async dropDB() {
 		await PCBash.runCommandPromise('docker exec mongo-' + this.seed + ' mongo ' + PCParseRunner.defaultDBName() + ' --eval "db.dropDatabase()"');
 	}
-
+	async nukeParseRunnerAllContainers(){
+		return `docker ps --filter "label=parse-runner" | grep -v CONTAINER | awk '{print $1}' | xargs --no-run-if-empty sudo docker rm -f`
+	}
 	async cleanUp() {
 		try {
 			await this.dropDB();

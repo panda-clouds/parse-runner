@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.30.0
+- Added label=parse-runner
+- Added --rm flag to parse container
+
 ### 0.29.0
 - bumped default parse server to 3.10.0
 - changed timeout from 20 seconds to 30
