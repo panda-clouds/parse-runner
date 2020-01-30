@@ -490,7 +490,11 @@ module.exports = function(options) {
 		}
 
 		if (this.prefillMongoValue) {
-			await this.prefillMongoValue(this);
+			try {
+				await this.prefillMongoValue(this);
+			} catch (e) {
+				throw new Error('The PrefillMongo() function failed. Check recent changes to the data files you are trying to inject for syntax errors.');
+			}
 		}
 
 
@@ -571,7 +575,7 @@ module.exports = function(options) {
 				await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');
 			}
 
-			let makeParse = 'docker run -d ' + this.networkFlag + ' ' +
+			let makeParse = 'docker run --rm -d --label "parse-runner" ' + this.networkFlag + ' ' +
 				'--name parse-' + this.seed + ' ' +
 				'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
 				'-v ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + ':/parse-server/cloud/ ';

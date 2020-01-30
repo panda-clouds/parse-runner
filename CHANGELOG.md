@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.31.0
+- Added --rm flag to other parse container
+- Added catch block for when "prefillMongo" fails
+
 ### 0.30.0
 - Added label=parse-runner
 - Added --rm flag to parse container
