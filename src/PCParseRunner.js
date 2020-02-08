@@ -34,7 +34,7 @@ class PCParseRunner {
 		this.networkName = 'network-' + this.seed;
 		this.networkFlag = '--network ' + this.networkName;
 		this.serverConfigObject = {};
-		this.timeoutValue = 30; // default to 30 tries for parse server to start each a 1 second apart
+		this.timeoutValue = 60; // default to 60 tries for parse server to start each a 1 second apart
 		this.collectCoverageValue = true;
 	}
 

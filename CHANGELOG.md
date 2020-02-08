@@ -1,5 +1,8 @@
 ## PCParseRunner Changelog
 
+### 0.32.0
+- Increased timeout to 60 seconds
+
 ### 0.31.0
 - Added --rm flag to other parse container
 - Added catch block for when "prefillMongo" fails
