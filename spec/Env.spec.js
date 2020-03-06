@@ -18,7 +18,7 @@ const PCParseRunner = require('../src/PCParseRunner.js');
 
 let Parse;
 
-describe('full project', () => {
+describe('environment variables', () => {
 	const parseRunner = new PCParseRunner();
 
 	parseRunner.helperClass('./NumberHelper.js');

@@ -420,7 +420,7 @@ module.exports = function(options) {
 	}
 
 	setEnvironmentFromFile(path) {
-		const jason = require(__dirname + path);
+		const jason = require(this.projectDirValue + '/' + path);
 
 		for (const [key, value] of Object.entries(jason)) {
 			this.setEnvVar(key, value);
