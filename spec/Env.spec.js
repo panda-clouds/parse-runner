@@ -22,7 +22,7 @@ describe('environment variables', () => {
 	const parseRunner = new PCParseRunner();
 
 	parseRunner.helperClass('./NumberHelper.js');
-	parseRunner.projectDir(__dirname + '/../src/full-project');
+	parseRunner.projectDir(__dirname + '/../src/full-project/');
 	parseRunner.collectCoverage(false);
 	parseRunner.setEnvironmentFromFile('../../spec/envVars.json');
 	parseRunner.injectCode(`
