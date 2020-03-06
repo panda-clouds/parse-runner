@@ -4,3 +4,6 @@ jest_0/
 src/full-project/.nyc_cache/
 src/full-project/.nyc_output/
 src/full-project/coverage/
+.nyc_cache/
+.nyc_output/
+coverage/

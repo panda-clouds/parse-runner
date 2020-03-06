@@ -29,12 +29,12 @@ class PCParseRunner {
 		// actual container to container communication happens over the network bridge
 		this.mongoPort = PCParseRunner.randomPort(); // 27017;
 		this.parsePort = PCParseRunner.randomPort(); // 1337;
-		this.parseVersionValue = '3.4.4'; // change to the latest version when it comes out
+		this.parseVersionValue = '3.10.0'; // change to the latest version when it comes out
 		this.mainPath = 'src/main.js';
 		this.networkName = 'network-' + this.seed;
 		this.networkFlag = '--network ' + this.networkName;
 		this.serverConfigObject = {};
-		this.timeoutValue = 20; // default to 20 tries for parse server to start each a 1 second apart
+		this.timeoutValue = 60; // default to 60 tries for parse server to start each a 1 second apart
 		this.collectCoverageValue = true;
 		this.env = {};
 	}
@@ -452,7 +452,7 @@ module.exports = function(options) {
 
 		await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir());
 
-		const makeMongo = 'docker run --rm -d ' + this.networkFlag + ' ' +
+		const makeMongo = 'docker run --rm -d --label "parse-runner" ' + this.networkFlag + ' ' +
 				'--name mongo-' + this.seed + ' ' +
 				'-p ' + this.mongoPort + ':27017 ' +
 				'mongo ' +
@@ -513,7 +513,11 @@ module.exports = function(options) {
 		}
 
 		if (this.prefillMongoValue) {
-			await this.prefillMongoValue(this);
+			try {
+				await this.prefillMongoValue(this);
+			} catch (e) {
+				throw new Error('The PrefillMongo() function failed. Check recent changes to the data files you are trying to inject for syntax errors.');
+			}
 		}
 
 
@@ -522,7 +526,7 @@ module.exports = function(options) {
 		// Prod- we build a docker image once and use the image (containg code) for testing.
 		if (this.prodImageAndTag()) {
 			// in prod we use the prebundled image with the code inside
-			let makeParse = 'docker run -d ' + this.networkFlag + ' ' +
+			let makeParse = 'docker run --rm -d --label "parse-runner" ' + this.networkFlag + ' ' +
 				'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ';
 
 			// no code coverage for prod images coverageDirValue
@@ -558,8 +562,7 @@ module.exports = function(options) {
 							});
 							`;
 
-				await this.addFileToProject(clockFunction, 'injectedPushConfig.js');
-
+				await this.addFileToProject(clockFunction, 'specInjectionPushConfig.js');
 
 				if (this.helperClassValue) {
 					const helperFunction = `
@@ -595,7 +598,7 @@ module.exports = function(options) {
 				await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');
 			}
 
-			let makeParse = 'docker run ' + this.getEnvVarStr() + ' -d ' + this.networkFlag + ' ' +
+			let makeParse = 'docker run --rm ' + this.getEnvVarStr() + ' -d --label "parse-runner" ' + this.networkFlag + ' ' +
 				'--name parse-' + this.seed + ' ' +
 				'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
 				'-v ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + ':/parse-server/cloud/ ';
@@ -658,7 +661,9 @@ module.exports = function(options) {
 	async dropDB() {
 		await PCBash.runCommandPromise('docker exec mongo-' + this.seed + ' mongo ' + PCParseRunner.defaultDBName() + ' --eval "db.dropDatabase()"');
 	}
-
+	nukeParseRunnerAllContainers() {
+		return 'docker ps --filter "label=parse-runner" | grep -v CONTAINER | awk \'{print $1}\' | xargs --no-run-if-empty sudo docker rm -f';
+	}
 	async cleanUp() {
 		try {
 			await this.dropDB();

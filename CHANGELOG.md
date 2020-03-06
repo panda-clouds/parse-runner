@@ -1,10 +1,31 @@
 ## PCParseRunner Changelog
 
+### 0.32.0
+- Increased timeout to 60 seconds
+
+### 0.31.0
+- Added --rm flag to other parse container
+- Added catch block for when "prefillMongo" fails
+
+### 0.30.0
+- Added label=parse-runner
+- Added --rm flag to parse container
+
+### 0.29.0
+- bumped default parse server to 3.10.0
+- changed timeout from 20 seconds to 30
+
+### 0.28.0
+- Renamed "injectedPushConfig" to "specInjectionPushConfig" so parse coverage could ignore with wildcard
+
+### 0.27.0
+- Added printAll function
+
 ### 0.26.0
-- added loadDefaultPushAdapter
+- Added loadDefaultPushAdapter
 
 ### 0.25.0
-- added Push injection
+- Added Push injection
 
 ### 0.24.1
 - Fixed insertOne failing when a property is set to "null"
@@ -15,16 +36,16 @@
 
 ### 0.23.0
 
-- added inflating of pointers and date objects from a JSON file.
+- Added inflating of pointers and date objects from a JSON file.
 
 ### 0.22.0
 
-- added getClock()
+- Added getClock()
 
 ### 0.21.0
 
-- added spec for Clock functionality added to Parse-Coverage
-- added setClock and resetClock
+- Added spec for Clock functionality Added to Parse-Coverage
+- Added setClock and resetClock
 
 ### 0.20.0
 
@@ -33,11 +54,11 @@
 ### 0.19.0
 
 - bumped default parse-server version to 3.4.4
-- added test for throwing error with a spec helper
+- Added test for throwing error with a spec helper
 
 ### 0.18.0
 
-- added "helperClass" and "callHelper"
+- Added "helperClass" and "callHelper"
 - moved .nyc_output and .nyc_cache to coverage for easy deleting and ignoring since...
 - we gave up on jest direct unit tests because jest deletes the 'coverage' directory each time and can't be configured
 
@@ -47,7 +68,7 @@
 
 ### 0.16.0
 
-- added the ability to inject functions into a spec for testing
+- Added the ability to inject functions into a spec for testing
 
 ### 0.15.0
 
@@ -59,7 +80,7 @@
 
 ### 0.13.0
 
-- added code coverage to the docker container
+- Added code coverage to the docker container
 
 ### 0.11.0
 
@@ -67,11 +88,11 @@
 - changed default location of "main.js"
 - fixed tests pointing to main.js
 - checked in node_modules for faster testing
-- added "prodImageAndTag" for exact prod testing
+- Added "prodImageAndTag" for exact prod testing
 
 ### 0.10.0
 
-- added prefill mongo function
+- Added prefill mongo function
 
 ### 0.9.0
 
@@ -79,10 +100,10 @@
 
 ### 0.8.0
 
-- added serverConfig
-- added insertOne
-- added insertMany
-- added No Cloud Code spec and fix
+- Added serverConfig
+- Added insertOne
+- Added insertMany
+- Added No Cloud Code spec and fix
 
 ### 0.7.0
 
@@ -107,7 +128,7 @@
 
 ### 0.2.0
 
-- added logs for when parse server crashes
+- Added logs for when parse server crashes
 
 ### 0.1.0
 
