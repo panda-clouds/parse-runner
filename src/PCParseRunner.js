@@ -36,6 +36,7 @@ class PCParseRunner {
 		this.serverConfigObject = {};
 		this.timeoutValue = 20; // default to 20 tries for parse server to start each a 1 second apart
 		this.collectCoverageValue = true;
+		this.env = {};
 	}
 
 	async getClock() {
@@ -414,6 +415,28 @@ module.exports = function(options) {
 		return result;
 	}
 
+	setEnvVar(key, value) {
+		this.env[key] = value;
+	}
+
+	setEnvironmentFromFile(path) {
+		const jason = require(__dirname + path);
+
+		for (const [key, value] of Object.entries(jason)) {
+			this.setEnvVar(key, value);
+		}
+	}
+
+	getEnvVarStr() {
+		let ret_str = '';
+
+		for (const [key, value] of Object.entries(this.env)) {
+			ret_str += '--env ' + key + '=' + value + ' ';
+		}
+
+		return ret_str.trim();
+	}
+
 	async startParseServer() {
 		process.env.TESTING = true;
 
@@ -572,7 +595,7 @@ module.exports = function(options) {
 				await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');
 			}
 
-			let makeParse = 'docker run -d ' + this.networkFlag + ' ' +
+			let makeParse = 'docker run ' + this.getEnvVarStr() + ' -d ' + this.networkFlag + ' ' +
 				'--name parse-' + this.seed + ' ' +
 				'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
 				'-v ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + ':/parse-server/cloud/ ';
