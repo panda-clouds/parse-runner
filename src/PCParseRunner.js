@@ -526,7 +526,7 @@ module.exports = function(options) {
 		// Prod- we build a docker image once and use the image (containg code) for testing.
 		if (this.prodImageAndTag()) {
 			// in prod we use the prebundled image with the code inside
-			let makeParse = 'docker run --rm -d --label "parse-runner" ' + this.networkFlag + ' ' +
+			let makeParse = 'docker run -d --label "parse-runner" ' + this.networkFlag + ' ' +
 				'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ';
 
 			// no code coverage for prod images coverageDirValue
@@ -598,7 +598,7 @@ module.exports = function(options) {
 				await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');
 			}
 
-			let makeParse = 'docker run --rm ' + this.getEnvVarStr() + ' -d --label "parse-runner" ' + this.networkFlag + ' ' +
+			let makeParse = 'docker run ' + this.getEnvVarStr() + ' -d --label "parse-runner" ' + this.networkFlag + ' ' +
 				'--name parse-' + this.seed + ' ' +
 				'-v ' + PCParseRunner.tempDir() + '/config-' + this.seed + ':/parse-server/configuration.json ' +
 				'-v ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + ':/parse-server/cloud/ ';

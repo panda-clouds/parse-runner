@@ -1,5 +1,8 @@
 ## PCParseRunner Changelog
 
+### 0.36.0
+- Reverted (0.31.0 --rm flag to other parse container) because we lose log info for crashed servers
+
 ### 0.32.0
 - Increased timeout to 60 seconds
 
