@@ -429,7 +429,7 @@ module.exports = function(options) {
 	}
 
 	async setEnvironmentFromFile(path) {
-		let noSpacesPath;
+		let noSpacesPath = path;
 
 		if (/\s/.test(path)) {
 			// the user path has some spaces
