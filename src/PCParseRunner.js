@@ -382,6 +382,15 @@ module.exports = function(options) {
 	}
 
 	static randomIntFromInterval(min, max) {
+		// Sleep for 2 milliseconds. (Yes, we are intentionally blocking the main thread and NOT using promises because its just two milliseconds)
+		// this prevents a bug where Math.random is executed
+		// in the same millisecond therefore producing the same number
+		const waitTill = new Date(new Date().getTime() + 2);
+
+		while (waitTill > new Date()) {
+			// Block the Main Thread
+		}
+
 		return Math.floor(Math.random() * (max - min + 1) + min);
 	}
 
@@ -419,10 +428,18 @@ module.exports = function(options) {
 		this.env[key] = value;
 	}
 
-	setEnvironmentFromFile(path) {
-		const jason = require(this.projectDirValue + path);
+	async setEnvironmentFromFile(path) {
+		let noSpacesPath;
 
-		for (const [key, value] of Object.entries(jason)) {
+		if (/\s/.test(path)) {
+			// the user path has some spaces
+			// escape them
+			noSpacesPath = path.replace(/ /g, '\\ ');
+		}
+
+		const jason = await PCBash.runCommandPromise('cat ' + noSpacesPath);
+
+		for (const [key, value] of Object.entries(JSON.parse(jason))) {
 			this.setEnvVar(key, value);
 		}
 	}
@@ -431,7 +448,7 @@ module.exports = function(options) {
 		let ret_str = '';
 
 		for (const [key, value] of Object.entries(this.env)) {
-			ret_str += '--env ' + key + '=' + value + ' ';
+			ret_str += '--env ' + key + '="' + value + '" ';
 		}
 
 		return ret_str.trim();

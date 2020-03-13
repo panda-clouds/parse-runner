@@ -24,7 +24,7 @@ describe('environment variables', () => {
 	parseRunner.helperClass('./NumberHelper.js');
 	parseRunner.projectDir(__dirname + '/../src/full-project/');
 	parseRunner.collectCoverage(false);
-	parseRunner.setEnvironmentFromFile('../../spec/envVars.json');
+
 	parseRunner.injectCode(`
 Parse.Cloud.define('getEnv', () => {
 	return process.env;
@@ -36,6 +36,8 @@ Parse.Cloud.define('getEnv', () => {
 		// await PCBash.runCommandPromise('docker build -t test-user/test-repo:1 src/full-project');
 
 		// process.env.CI_PROD_IMAGE_AND_TAG = 'test-user/test-repo:1';
+		await parseRunner.setEnvironmentFromFile(__dirname + '/../spec/envVars.json');
+		parseRunner.setEnvVar('TEST_2', 'My Humps');
 		Parse = await parseRunner.startParseServer();
 	}, 1000 * 60 * 2);
 
@@ -53,10 +55,11 @@ Parse.Cloud.define('getEnv', () => {
 	// This test is not found in CodeCoverageDir2
 	// to test merging of "coverage" data
 	it('should return only in 1', async () => {
-		expect.assertions(2);
+		expect.assertions(3);
 		const result = await Parse.Cloud.run('getEnv');
 
 		expect(result.TEST_0).toBe('hello');
 		expect(result.TEST_1).toBe('world');
+		expect(result.TEST_2).toBe('My Humps');
 	});
 });

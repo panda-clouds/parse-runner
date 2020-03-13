@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.37.0
+- Fixed "setEnvironmentFromFile"
+- Fixed "port in use" bug (Math.random is same millisecond)
+
 ### 0.36.0
 - Reverted (0.31.0 --rm flag to other parse container) because we lose log info for crashed servers
 
