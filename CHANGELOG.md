@@ -1,5 +1,8 @@
 ## PCParseRunner Changelog
 
+### 0.38.0
+- Changed setEnvironmentFromFile to use require
+
 ### 0.37.0
 - Fixed "setEnvironmentFromFile"
 - Fixed "port in use" bug (Math.random is same millisecond)

@@ -428,7 +428,7 @@ module.exports = function(options) {
 		this.env[key] = value;
 	}
 
-	async setEnvironmentFromFile(path) {
+	setEnvironmentFromFile(path) {
 		let noSpacesPath = path;
 
 		if (/\s/.test(path)) {
@@ -437,9 +437,9 @@ module.exports = function(options) {
 			noSpacesPath = path.replace(/ /g, '\\ ');
 		}
 
-		const jason = await PCBash.runCommandPromise('cat ' + noSpacesPath);
+		const jason = require(noSpacesPath);
 
-		for (const [key, value] of Object.entries(JSON.parse(jason))) {
+		for (const [key, value] of Object.entries(jason)) {
 			this.setEnvVar(key, value);
 		}
 	}

@@ -24,7 +24,8 @@ describe('environment variables', () => {
 	parseRunner.helperClass('./NumberHelper.js');
 	parseRunner.projectDir(__dirname + '/../src/full-project/');
 	parseRunner.collectCoverage(false);
-
+	parseRunner.setEnvironmentFromFile('../spec/envVars.json');
+	parseRunner.setEnvVar('TEST_2', 'My Humps');
 	parseRunner.injectCode(`
 Parse.Cloud.define('getEnv', () => {
 	return process.env;
@@ -36,8 +37,7 @@ Parse.Cloud.define('getEnv', () => {
 		// await PCBash.runCommandPromise('docker build -t test-user/test-repo:1 src/full-project');
 
 		// process.env.CI_PROD_IMAGE_AND_TAG = 'test-user/test-repo:1';
-		await parseRunner.setEnvironmentFromFile(__dirname + '/../spec/envVars.json');
-		parseRunner.setEnvVar('TEST_2', 'My Humps');
+
 		Parse = await parseRunner.startParseServer();
 	}, 1000 * 60 * 2);
 
