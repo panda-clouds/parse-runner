@@ -1,5 +1,8 @@
 ## PCParseRunner Changelog
 
+### 0.40.0
+- Added local testing example
+
 ### 0.38.0
 - Changed setEnvironmentFromFile to use require
 
