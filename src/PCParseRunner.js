@@ -429,15 +429,7 @@ module.exports = function(options) {
 	}
 
 	setEnvironmentFromFile(path) {
-		let noSpacesPath = path;
-
-		if (/\s/.test(path)) {
-			// the user path has some spaces
-			// escape them
-			noSpacesPath = path.replace(/ /g, '\\ ');
-		}
-
-		const jason = require(noSpacesPath);
+		const jason = require(this.projectDirValue + path);
 
 		for (const [key, value] of Object.entries(jason)) {
 			this.setEnvVar(key, value);
