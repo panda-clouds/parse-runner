@@ -18,9 +18,10 @@ fs.readFileAsync = filename => {
 
 const PCBash = require('@panda-clouds/parse-bash');
 const Parse = require('parse/node');
-const exampleAppId = 'example-app-id';
-const exampleJavascriptKey = 'example-javascript-key';
-const exampleMasterKey = 'example-master-key';
+const localAppId = 'local-app-id';
+const localJavascriptKey = 'local-javascript-key';
+const localMasterKey = 'local-master-key';
+const localClientKey = 'local-client-key';
 
 class PCParseRunner {
 	constructor(parsePort, mongoPort) {
@@ -451,7 +452,7 @@ module.exports = function(options) {
 
 
 		// if (process.env.SPEC_USE_EXTERNAL_SERVER) {
-		// 	Parse.initialize(exampleAppId, exampleJavascriptKey, exampleMasterKey);
+		// 	Parse.initialize(localAppId, localJavascriptKey, localMasterKey);
 		// 	Parse.serverURL = 'http://localhost:' + this.parsePort + '/1';
 
 		// 	return Parse;
@@ -474,9 +475,10 @@ module.exports = function(options) {
 		config.allowInsecureHTTP = true;
 		const app = {};
 
-		app.appId = exampleAppId;
-		app.masterKey = exampleMasterKey;
-		app.javascriptKey = exampleJavascriptKey;
+		app.appId = localAppId;
+		app.masterKey = localMasterKey;
+		app.javascriptKey = localJavascriptKey;
+		app.clientKey = localClientKey;
 		app.port = 1337; // this.parsePort;
 		app.mountPath = '/1';
 		app.verbose = this.verboseValue;
@@ -646,7 +648,7 @@ module.exports = function(options) {
 			throw new Error('Parse Server crashed. Please check logs to debug cloud or configuration issues.');
 		}
 
-		Parse.initialize(exampleAppId, exampleJavascriptKey, exampleMasterKey);
+		Parse.initialize(localAppId, localJavascriptKey, localMasterKey);
 		Parse.serverURL = 'http://localhost:' + this.parsePort + '/1';
 		// eslint-disable-next-line no-console
 		console.log('Parse Server up and running');

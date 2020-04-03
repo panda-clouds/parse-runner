@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.41.0
+- Added Client key for local testing
+- renamed "example-app-id" to "local-app-id"
+
 ### 0.40.0
 - Added local testing example
 
