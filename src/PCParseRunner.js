@@ -23,12 +23,12 @@ const exampleJavascriptKey = 'example-javascript-key';
 const exampleMasterKey = 'example-master-key';
 
 class PCParseRunner {
-	constructor() {
-		this.seed = PCParseRunner.randomIntFromInterval(0, 99999);
+	constructor(parsePort, mongoPort) {
+		this.seed = parsePort ? parsePort : PCParseRunner.randomIntFromInterval(0, 99999);
 		// these random port are opened to the public to health check the services
 		// actual container to container communication happens over the network bridge
-		this.mongoPort = PCParseRunner.randomPort(); // 27017;
-		this.parsePort = PCParseRunner.randomPort(); // 1337;
+		this.mongoPort = mongoPort ? mongoPort : PCParseRunner.randomPort(); // 27017;
+		this.parsePort = parsePort ? parsePort : PCParseRunner.randomPort(); // 1337;
 		this.parseVersionValue = '3.10.0'; // change to the latest version when it comes out
 		this.mainPath = 'src/main.js';
 		this.networkName = 'network-' + this.seed;
