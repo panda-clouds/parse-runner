@@ -549,65 +549,8 @@ module.exports = function(options) {
 
 			await PCBash.runCommandPromise(makeParse);
 		} else {
-			// In development we use volumes to copy files over
-			await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
-
-			if (this.projectDirValue) {
-				await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + '/. ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
-
-				// add clock function
-				const clockFunction = `
-							var MockDate = require('mockdate');
-							
-							Parse.Cloud.define('specGetCurrentTime', request => {
-								return new Date().getTime();
-							});
-
-							Parse.Cloud.define('specSetCurrentTime', request => {
-								const time = request.params.currentTime
-								MockDate.set(new Date(time))
-							});
-
-							Parse.Cloud.define('specResetCurrentTime', request => {
-								MockDate.reset();
-							});
-							`;
-
-				await this.addFileToProject(clockFunction, 'specInjectionPushConfig.js');
-
-				if (this.helperClassValue) {
-					const helperFunction = `
-							const RunnerHelperClass = require('` + this.helperClassValue + `');
-							Parse.Cloud.define('callHelperClassFunction', request => {
-								const functionName = request.params.HelperFunction;
-								if (request.params.parameters) {
-									const p = request.params.parameters;
-									return RunnerHelperClass[functionName](...p);
-								} else {
-									return RunnerHelperClass[functionName]();
-								}
-								
-							});
-							`;
-
-					await this.addFileToProject(helperFunction, 'specInjectionHelperClass.js');
-				}
-
-				if (this.injectCodeValue) {
-					await this.addFileToProject(this.injectCodeValue, 'specInjectionUserDefinedCode.js');
-				}
-
-				if (this.rawPushValue) {
-					await this.addFileToProject(this.rawPushValue, 'specInjectionPushModule.js');
-				}
-
-
-				if (this.shouldNPMInstall) {
-					await PCBash.runCommandPromise('cd ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '; npm install');
-				}
-			} else if (this.cloudPage) {
-				await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');
-			}
+			
+			await this.loadProjectFiles()
 
 			let makeParse = 'docker run ' + this.getEnvVarStr() + ' -d --label "parse-runner" ' + this.networkFlag + ' ' +
 				'--name parse-' + this.seed + ' ' +
@@ -674,6 +617,81 @@ module.exports = function(options) {
 	}
 	nukeParseRunnerAllContainers() {
 		return 'docker ps --filter "label=parse-runner" | grep -v CONTAINER | awk \'{print $1}\' | xargs --no-run-if-empty sudo docker rm -f';
+	}
+
+	async reloadFiles(){
+		try {
+			if (this.projectDirValue || this.cloudPage) {
+				await PCBash.runCommandPromise('rm -r ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
+			}
+		} catch (e) {
+			// Disregard failures
+		}
+		await this.loadProjectFiles()
+		await PCBash.runCommandPromise('docker restart parse-' + this.seed);
+	}
+
+	async loadProjectFiles(){
+		// In development we use volumes to copy files over
+		await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
+
+		if (this.projectDirValue) {
+			await PCBash.runCommandPromise('cp -r ' + this.projectDirValue + '/. ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
+
+			// add clock function
+			const clockFunction = `
+						var MockDate = require('mockdate');
+						
+						Parse.Cloud.define('specGetCurrentTime', request => {
+							return new Date().getTime();
+						});
+
+						Parse.Cloud.define('specSetCurrentTime', request => {
+							const time = request.params.currentTime
+							MockDate.set(new Date(time))
+						});
+
+						Parse.Cloud.define('specResetCurrentTime', request => {
+							MockDate.reset();
+						});
+						`;
+
+			await this.addFileToProject(clockFunction, 'specInjectionPushConfig.js');
+
+			if (this.helperClassValue) {
+				const helperFunction = `
+						const RunnerHelperClass = require('` + this.helperClassValue + `');
+						Parse.Cloud.define('callHelperClassFunction', request => {
+							const functionName = request.params.HelperFunction;
+							if (request.params.parameters) {
+								const p = request.params.parameters;
+								return RunnerHelperClass[functionName](...p);
+							} else {
+								return RunnerHelperClass[functionName]();
+							}
+							
+						});
+						`;
+
+				await this.addFileToProject(helperFunction, 'specInjectionHelperClass.js');
+			}
+
+			if (this.injectCodeValue) {
+				await this.addFileToProject(this.injectCodeValue, 'specInjectionUserDefinedCode.js');
+			}
+
+			if (this.rawPushValue) {
+				await this.addFileToProject(this.rawPushValue, 'specInjectionPushModule.js');
+			}
+
+
+			if (this.shouldNPMInstall) {
+				await PCBash.runCommandPromise('cd ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '; npm install');
+			}
+		} else if (this.cloudPage) {
+			await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');
+		}
+	
 	}
 	async cleanUp() {
 		try {

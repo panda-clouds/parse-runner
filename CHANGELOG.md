@@ -1,5 +1,8 @@
 ## PCParseRunner Changelog
 
+### 0.42.0
+- Added reloadFiles function for file tracking on live development
+
 ### 0.41.0
 - Added Client key for local testing
 - renamed "example-app-id" to "local-app-id"
