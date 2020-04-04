@@ -621,6 +621,13 @@ module.exports = function(options) {
 
 	async reloadFiles(){
 		try {
+			// why stop the container?
+			// because when we are using this for live development we don't want the user thinking the cloud has updated yet 
+			await PCBash.runCommandPromise('docker stop parse-' + this.seed);
+		} catch (e) {
+			// Disregard failures
+		}
+		try {
 			if (this.projectDirValue || this.cloudPage) {
 				await PCBash.runCommandPromise('rm -r ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
 			}
