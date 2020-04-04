@@ -566,8 +566,15 @@ module.exports = function(options) {
 				makeParse = makeParse + '-v ' + this.projectDirValue + '/.nyc_output:/parse-server/.nyc_output ';
 			}
 
-			makeParse = makeParse + '-p ' + this.parsePort + ':1337 ' +
-				'pandaclouds/parse-coverage:' + this.parseVersionValue + ' ' +
+			makeParse = makeParse + '-p ' + this.parsePort + ':1337 ' + 'pandaclouds/parse-coverage:';
+
+			if (this.collectCoverageValue){
+				makeParse = makeParse + this.parseVersionValue 
+			}else{
+				makeParse = makeParse + this.parseVersionValue  + '-no-cov'
+			}
+			
+			makeParse = makeParse + ' ' +
 				'/parse-server/configuration.json';
 
 			await PCBash.runCommandPromise(makeParse);

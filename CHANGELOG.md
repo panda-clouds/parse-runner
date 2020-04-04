@@ -1,5 +1,8 @@
 ## PCParseRunner Changelog
 
+### 0.43.0
+- Added no-cov if we arent tracking coverage
+
 ### 0.42.0
 - Added reloadFiles function for file tracking on live development
 
