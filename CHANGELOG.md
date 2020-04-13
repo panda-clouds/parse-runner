@@ -1,5 +1,8 @@
 ## PCParseRunner Changelog
 
+### 0.45.0
+- Fixed spaces in file path
+
 ### 0.43.0
 - Added no-cov if we arent tracking coverage
 
