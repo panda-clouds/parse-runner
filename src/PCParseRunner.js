@@ -114,6 +114,7 @@ class PCParseRunner {
 
 		let myPath = userPath;
 
+		this.projectDirValueUnescaped = myPath
 		if (/\s/.test(userPath)) {
 			// the user path has some spaces
 			// escape them
@@ -430,7 +431,7 @@ module.exports = function(options) {
 	}
 
 	setEnvironmentFromFile(path) {
-		const jason = require(this.projectDirValue + path);
+		const jason = require(this.projectDirValueUnescaped + path);
 
 		for (const [key, value] of Object.entries(jason)) {
 			this.setEnvVar(key, value);
@@ -549,8 +550,7 @@ module.exports = function(options) {
 
 			await PCBash.runCommandPromise(makeParse);
 		} else {
-			
-			await this.loadProjectFiles()
+			await this.loadProjectFiles();
 
 			let makeParse = 'docker run ' + this.getEnvVarStr() + ' -d --label "parse-runner" ' + this.networkFlag + ' ' +
 				'--name parse-' + this.seed + ' ' +
@@ -568,12 +568,12 @@ module.exports = function(options) {
 
 			makeParse = makeParse + '-p ' + this.parsePort + ':1337 ' + 'pandaclouds/parse-coverage:';
 
-			if (this.collectCoverageValue){
-				makeParse = makeParse + this.parseVersionValue 
-			}else{
-				makeParse = makeParse + this.parseVersionValue  + '-no-cov'
+			if (this.collectCoverageValue) {
+				makeParse += this.parseVersionValue;
+			} else {
+				makeParse = makeParse + this.parseVersionValue + '-no-cov';
 			}
-			
+
 			makeParse = makeParse + ' ' +
 				'/parse-server/configuration.json';
 
@@ -626,14 +626,15 @@ module.exports = function(options) {
 		return 'docker ps --filter "label=parse-runner" | grep -v CONTAINER | awk \'{print $1}\' | xargs --no-run-if-empty sudo docker rm -f';
 	}
 
-	async reloadFiles(){
+	async reloadFiles() {
 		try {
 			// why stop the container?
-			// because when we are using this for live development we don't want the user thinking the cloud has updated yet 
+			// because when we are using this for live development we don't want the user thinking the cloud has updated yet
 			await PCBash.runCommandPromise('docker stop parse-' + this.seed);
 		} catch (e) {
 			// Disregard failures
 		}
+
 		try {
 			if (this.projectDirValue || this.cloudPage) {
 				await PCBash.runCommandPromise('rm -r ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
@@ -641,11 +642,12 @@ module.exports = function(options) {
 		} catch (e) {
 			// Disregard failures
 		}
-		await this.loadProjectFiles()
+
+		await this.loadProjectFiles();
 		await PCBash.runCommandPromise('docker restart parse-' + this.seed);
 	}
 
-	async loadProjectFiles(){
+	async loadProjectFiles() {
 		// In development we use volumes to copy files over
 		await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
 
@@ -705,7 +707,6 @@ module.exports = function(options) {
 		} else if (this.cloudPage) {
 			await PCBash.putStringInFile(this.cloudPage, PCParseRunner.tempDir() + '/cloud-' + this.seed + '/main.js');
 		}
-	
 	}
 	async cleanUp() {
 		try {
