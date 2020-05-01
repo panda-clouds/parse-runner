@@ -607,14 +607,13 @@ module.exports = function(options) {
 		return this.getParse();
 	}
 
-	getParse(){
+	getParse() {
 		Parse.initialize(localAppId, localJavascriptKey, localMasterKey);
 		Parse.serverURL = 'http://localhost:' + this.parsePort + '/1';
 		// eslint-disable-next-line no-console
 		console.log('Parse Server up and running');
 
 		return Parse;
-		return Parse
 	}
 
 	internalMainDir() {
