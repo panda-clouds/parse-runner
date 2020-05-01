@@ -114,7 +114,8 @@ class PCParseRunner {
 
 		let myPath = userPath;
 
-		this.projectDirValueUnescaped = myPath
+		this.projectDirValueUnescaped = myPath;
+
 		if (/\s/.test(userPath)) {
 			// the user path has some spaces
 			// escape them
@@ -769,6 +770,33 @@ module.exports = function(options) {
 		} catch (e) {
 			// Disregard failures
 		}
+	}
+
+	async drop(className) {
+		const connectionString = this.mongoURL();
+		const client = await MongoClient.connect(connectionString,
+			{ useNewUrlParser: true, useUnifiedTopology: true });
+		const db = client.db(PCParseRunner.defaultDBName());
+		let res = null;
+		let err = null;
+
+		try {
+			res = await db.dropCollection(className);
+		} catch (e) {
+			if (e.message !== null) {
+				err = e.message;
+			} else {
+				err = 'drop Failed.';
+			}
+		} finally {
+			client.close();
+		}
+
+		if (err !== null) {
+			throw new Error(err);
+		}
+
+		return res;
 	}
 }
 
