@@ -603,7 +603,17 @@ module.exports = function(options) {
 		// eslint-disable-next-line no-console
 		console.log('Parse Server up and running');
 
+		return this.getParse();
+	}
+
+	getParse(){
+		Parse.initialize(localAppId, localJavascriptKey, localMasterKey);
+		Parse.serverURL = 'http://localhost:' + this.parsePort + '/1';
+		// eslint-disable-next-line no-console
+		console.log('Parse Server up and running');
+
 		return Parse;
+		return Parse
 	}
 
 	internalMainDir() {
@@ -716,37 +726,37 @@ module.exports = function(options) {
 		}
 
 		try {
-			await PCBash.runCommandPromise('docker logs parse-' + this.seed);
+			await PCBash.runCommandPromise('docker logs parse-' + this.seed + ' ||:');
 		} catch (e) {
 			// Disregard failures
 		}
 
 		try {
-			await PCBash.runCommandPromise('rm ' + PCParseRunner.tempDir() + '/config-' + this.seed);
+			await PCBash.runCommandPromise('rm ' + PCParseRunner.tempDir() + '/config-' + this.seed + ' ||:');
 		} catch (e) {
 			// Disregard failures
 		}
 
 		try {
-			await PCBash.runCommandPromise('docker stop parse-' + this.seed);
+			await PCBash.runCommandPromise('docker stop parse-' + this.seed + ' ||:');
 		} catch (e) {
 			// Disregard failures
 		}
 
 		try {
-			await PCBash.runCommandPromise('docker rm parse-' + this.seed);
+			await PCBash.runCommandPromise('docker rm parse-' + this.seed + ' ||:');
 		} catch (e) {
 			// Disregard failures
 		}
 
 		try {
-			await PCBash.runCommandPromise('docker stop mongo-' + this.seed);
+			await PCBash.runCommandPromise('docker stop mongo-' + this.seed + ' ||:');
 		} catch (e) {
 			// Disregard failures
 		}
 
 		try {
-			await PCBash.runCommandPromise('docker network rm ' + this.networkName);
+			await PCBash.runCommandPromise('docker network rm ' + this.networkName + ' ||:');
 		} catch (e) {
 			// Disregard failures
 		}
@@ -754,7 +764,7 @@ module.exports = function(options) {
 		// This must be after "docker stop parse-seed" for code coverage to work.
 		try {
 			if (this.projectDirValue || this.cloudPage) {
-				await PCBash.runCommandPromise('rm -r ' + PCParseRunner.tempDir() + '/cloud-' + this.seed);
+				await PCBash.runCommandPromise('rm -rf ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + ' ||:');
 			}
 		} catch (e) {
 			// Disregard failures
