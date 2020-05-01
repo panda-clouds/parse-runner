@@ -1,5 +1,13 @@
 ## PCParseRunner Changelog
 
+### 0.47.0
+- added getParse
+- forced cleanup of cloud directory
+- added no-op ||: on cleanup
+
+### 0.46.0
+- added drop()
+
 ### 0.45.0
 - Fixed spaces in file path
 
