@@ -479,8 +479,7 @@ module.exports = function(options) {
 
 			if (cc === 'true') {
 				// parse-1337 is present and running
-				this.parsePort = 1337;
-				this.mongoPort = 27017;
+				return this.getParse(1337);
 			}
 		} catch (error) {
 			// it's ok
@@ -657,9 +656,13 @@ module.exports = function(options) {
 		return this.getParse();
 	}
 
-	getParse() {
+	getParse(portOverride) {
 		Parse.initialize(localAppId, localJavascriptKey, localMasterKey);
-		Parse.serverURL = 'http://localhost:' + this.parsePort + '/1';
+		if(portOverride){
+			Parse.serverURL = 'http://localhost:' + portOverride + '/1';
+		}else{
+			Parse.serverURL = 'http://localhost:' + this.parsePort + '/1';
+		}
 		// eslint-disable-next-line no-console
 		console.log('Parse Server up and running');
 
