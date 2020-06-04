@@ -414,7 +414,7 @@ module.exports = function(options) {
 
 		if (port === 1337 || port === 27017) {
 			// these are the real ports and we dont want them to accidentally match with prod or command-center
-			return randomIntFromInterval(min, max);
+			return PCParseRunner.randomIntFromInterval(min, max);
 		}
 
 		return port;
