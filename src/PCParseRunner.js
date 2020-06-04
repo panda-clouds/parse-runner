@@ -3,6 +3,7 @@ const fs = require('fs');
 const notBothError = 'Only set projectDir OR cloud, Not Both.';
 const MongoClient = require('mongodb').MongoClient;
 const moment = require('moment');
+const cryptoRandomString = require('crypto-random-string');
 
 fs.readFileAsync = filename => {
 	return new Promise((resolve, reject) => {
@@ -70,6 +71,10 @@ class PCParseRunner {
 		const result = await Parse.Cloud.run('specSetCurrentTime', { currentTime: currentTime });
 
 		return result;
+	}
+
+	setExternalDatabaseURL(url) {
+		this.externalDatabaseURL = url;
 	}
 
 	async resetClock() {
@@ -182,15 +187,17 @@ module.exports = function(options) {
 	}
 
 	static manyMongoToParseObjects(objects) {
-		const returnArray = [];
+		if (!this.externalDatabaseURL) {
+			const returnArray = [];
 
-		for (let i = objects.length - 1; i >= 0; i--) {
-			const anObject = objects[i];
+			for (let i = objects.length - 1; i >= 0; i--) {
+				const anObject = objects[i];
 
-			returnArray.push(PCParseRunner.mongoToParseObject(anObject));
+				returnArray.push(PCParseRunner.mongoToParseObject(anObject));
+			}
+
+			return returnArray;
 		}
-
-		return returnArray;
 	}
 
 	static isISO8601withTimeZone(string) {
@@ -220,111 +227,125 @@ module.exports = function(options) {
 	}
 
 	static mongoToParseObject(object) {
-		const returnObject = {};
-		const keys = Object.keys(object);
+		if (!this.externalDatabaseURL) {
+			const returnObject = {};
+			const keys = Object.keys(object);
 
-		for (let i = keys.length - 1; i >= 0; i--) {
-			const thisKey = keys[i];
-			const oldValue = object[thisKey];
-			let newValue = oldValue;
+			for (let i = keys.length - 1; i >= 0; i--) {
+				const thisKey = keys[i];
+				const oldValue = object[thisKey];
+				let newValue = oldValue;
 
-			if (oldValue) {
-				if (PCParseRunner.isISO8601withTimeZone(oldValue)) {
-					newValue = new Date(oldValue);
+				if (oldValue) {
+					if (PCParseRunner.isISO8601withTimeZone(oldValue)) {
+						newValue = new Date(oldValue);
+					}
+
+					if (oldValue.__type && oldValue.__type === 'Date' && oldValue.iso) {
+						newValue = new Date(oldValue.iso);
+					}
+
+					if (oldValue.__type && oldValue.__type === 'Pointer' && oldValue.className && oldValue.objectId) {
+						newValue = oldValue.className + '$' + oldValue.objectId;
+					}
 				}
 
-				if (oldValue.__type && oldValue.__type === 'Date' && oldValue.iso) {
-					newValue = new Date(oldValue.iso);
-				}
-
-				if (oldValue.__type && oldValue.__type === 'Pointer' && oldValue.className && oldValue.objectId) {
-					newValue = oldValue.className + '$' + oldValue.objectId;
-				}
+				returnObject[thisKey] = newValue;
 			}
 
-			returnObject[thisKey] = newValue;
+			return returnObject;
 		}
-
-		return returnObject;
 	}
 	// convience function
 	async insertOne(className, object) {
-		if (!object || typeof object !== 'object') {
-			throw new Error('object must be of type object');
-		}
-
-		const connectionString = this.mongoURL();
-		const client = await MongoClient.connect(connectionString,
-			{ useNewUrlParser: true });
-
-		const db = client.db(PCParseRunner.defaultDBName());
-
-		let res = null;
-		let err = null;
-
-
-		try {
-			res = await db.collection(className).insertOne(PCParseRunner.mongoToParseObject(object));
-		} catch (e) {
-			if (e.message !== null) {
-				err = e.message;
-			} else {
-				err = 'insertOne Failed.';
-			}
-		} finally {
-			client.close();
-		}
-
-		if (err !== null) {
-			throw new Error(err);
-		}
-
-		return res;
-	}
-
-	async insertMany(className, objects) {
-		if (!objects || !objects.length || !Array.isArray(objects)) {
-			throw new Error('objects parameter must be an array');
-		}
-
-		for (let i = objects.length - 1; i >= 0; i--) {
-			const object = objects[i];
-
+		if (!this.externalDatabaseURL) {
 			if (!object || typeof object !== 'object') {
 				throw new Error('object must be of type object');
 			}
-		}
 
-		const connectionString = this.mongoURL();
-		const client = await MongoClient.connect(connectionString,
-			{ useNewUrlParser: true });
+			const connectionString = this.mongoURL();
+			const client = await MongoClient.connect(connectionString,
+				{ useNewUrlParser: true });
 
-		const db = client.db(PCParseRunner.defaultDBName());
+			const db = client.db(PCParseRunner.defaultDBName());
 
-		let res = null;
-		let err = null;
+			let res = null;
+			let err = null;
 
-		try {
-			res = await db.collection(className).insertMany(PCParseRunner.manyMongoToParseObjects(objects));
-		} catch (e) {
-			if (e.message !== null) {
-				err = e.message;
-			} else {
-				err = 'insertMany Failed.';
+
+			try {
+				res = await db.collection(className).insertOne(PCParseRunner.mongoToParseObject(object));
+			} catch (e) {
+				if (e.message !== null) {
+					err = e.message;
+				} else {
+					err = 'insertOne Failed.';
+				}
+			} finally {
+				client.close();
 			}
-		} finally {
-			client.close();
-		}
 
-		if (err !== null) {
-			throw new Error(err);
-		}
+			if (err !== null) {
+				throw new Error(err);
+			}
 
-		return res;
+			return res;
+		}
+	}
+
+	async insertMany(className, objects) {
+		if (!this.externalDatabaseURL) {
+			if (!objects || !objects.length || !Array.isArray(objects)) {
+				throw new Error('objects parameter must be an array');
+			}
+
+			for (let i = objects.length - 1; i >= 0; i--) {
+				const object = objects[i];
+
+				if (!object || typeof object !== 'object') {
+					throw new Error('object must be of type object');
+				}
+			}
+
+			const connectionString = this.mongoURL();
+			const client = await MongoClient.connect(connectionString,
+				{ useNewUrlParser: true });
+
+			const db = client.db(PCParseRunner.defaultDBName());
+
+			let res = null;
+			let err = null;
+
+			try {
+				res = await db.collection(className).insertMany(PCParseRunner.manyMongoToParseObjects(objects));
+			} catch (e) {
+				if (e.message !== null) {
+					err = e.message;
+				} else {
+					err = 'insertMany Failed.';
+				}
+			} finally {
+				client.close();
+			}
+
+			if (err !== null) {
+				throw new Error(err);
+			}
+
+			return res;
+		}
 	}
 
 	async find(className, query) {
-		const connectionString = this.mongoURL();
+		// we CAN find on external DBs because that won't break production
+		let connectionString;
+
+		if (this.externalDatabaseURL) {
+			connectionString = this.externalDatabaseURL;
+		} else {
+			connectionString = this.mongoURL();
+		}
+
 		const client = await MongoClient.connect(connectionString,
 			{ useNewUrlParser: true });
 
@@ -385,16 +406,18 @@ module.exports = function(options) {
 	}
 
 	static randomIntFromInterval(min, max) {
-		// Sleep for 2 milliseconds. (Yes, we are intentionally blocking the main thread and NOT using promises because its just two milliseconds)
-		// this prevents a bug where Math.random is executed
-		// in the same millisecond therefore producing the same number
-		const waitTill = new Date(new Date().getTime() + 2);
+		// cryptoRandomString is required to prevent collitions that
+		// happened as a result of Math.random using the current millisecond
+		// JEST_WORKER_ID add futher entropy
+		const randomNumber = cryptoRandomString({ length: 10, type: 'numeric' }) + process.env.JEST_WORKER_ID;
+		const port = Math.floor(parseFloat('0.' + randomNumber) * (max - min + 1) + min);
 
-		while (waitTill > new Date()) {
-			// Block the Main Thread
+		if (port === 1337 || port === 27017) {
+			// these are the real ports and we dont want them to accidentally match with prod or command-center
+			return randomIntFromInterval(min, max);
 		}
 
-		return Math.floor(Math.random() * (max - min + 1) + min);
+		return port;
 	}
 
 	static randomPort() {
@@ -450,6 +473,20 @@ module.exports = function(options) {
 	}
 
 	async startParseServer() {
+		try {
+			const cc = await PCBash.runCommandPromise('docker inspect --format=\'{{.State.Running}}\' parse-1337 || echo false');
+
+
+			if (cc === 'true') {
+				// parse-1337 is present and running
+				this.parsePort = 1337;
+				this.mongoPort = 27017;
+			}
+		} catch (error) {
+			// it's ok
+
+		}
+
 		process.env.TESTING = true;
 
 
@@ -464,13 +501,16 @@ module.exports = function(options) {
 
 		await PCBash.runCommandPromise('mkdir -p ' + PCParseRunner.tempDir());
 
-		const makeMongo = 'docker run --rm -d --label "parse-runner" ' + this.networkFlag + ' ' +
+		if (!this.externalDatabaseURL) {
+			const makeMongo = 'docker run --rm -d --label "parse-runner" ' + this.networkFlag + ' ' +
 				'--name mongo-' + this.seed + ' ' +
 				'-p ' + this.mongoPort + ':27017 ' +
 				'mongo ' +
 				'';
 
-		await PCBash.runCommandPromise(makeMongo);
+			await PCBash.runCommandPromise(makeMongo);
+		}
+
 
 		const config = {};
 
@@ -484,9 +524,15 @@ module.exports = function(options) {
 		app.port = 1337; // this.parsePort;
 		app.mountPath = '/1';
 		app.verbose = this.verboseValue;
+
 		// app.databaseName = PCParseRunner.defaultDBName();
 		// we hardcode 27017 because all C2C communication is linked with a bridge
-		app.databaseURI = 'mongodb://mongo-' + this.seed + ':27017/' + PCParseRunner.defaultDBName();
+		if (this.externalDatabaseURL) {
+			app.databaseURI = this.externalDatabaseURL;
+		} else {
+			app.databaseURI = 'mongodb://mongo-' + this.seed + ':27017/' + PCParseRunner.defaultDBName();
+		}
+
 		app.publicServerURL = 'http://localhost:' + app.port + app.mountPath;
 		app.serverURL = 'http://localhost:1337' + app.mountPath;
 
@@ -507,32 +553,36 @@ module.exports = function(options) {
 
 		await PCBash.putStringInFile(config, PCParseRunner.tempDir() + '/config-' + this.seed);
 
-		// wait for mongo to come up so we don't get a connection error
-		try {
-			await PCBash.runCommandPromise(
-				'export PC_RUNNER_MONGO_TRIES=10\n' +
-				'until $(curl --output /dev/null --silent --fail http://localhost:' + this.mongoPort + '); do\n' +
-				'    printf \'Waiting for Mongo to come up...\n\'\n' +
-				'    sleep 1\n' +
-				'    ((PC_RUNNER_MONGO_TRIES--))\n' +
-				'    if [ "$PC_RUNNER_MONGO_TRIES" -eq "0" ]; then\n' +
-				'        echo "Timed out";\n' +
-				'        exit 1;\n' +
-				'    fi\n' +
-				'done'
-			);
-		} catch (e) {
-			throw new Error('Mongo is in a crash loop. Please try again');
-		}
+		if (!this.externalDatabaseURL) {
+			// setting an external Database URL means we dont manage it's lifecycle
 
-		if (this.prefillMongoValue) {
+			// wait for mongo to come up so we don't get a connection error
 			try {
-				await this.prefillMongoValue(this);
+				await PCBash.runCommandPromise(
+					'export PC_RUNNER_MONGO_TRIES=10\n' +
+					'until $(curl --output /dev/null --silent --fail http://localhost:' + this.mongoPort + '); do\n' +
+					'    printf \'Waiting for Mongo to come up...\n\'\n' +
+					'    sleep 1\n' +
+					'    ((PC_RUNNER_MONGO_TRIES--))\n' +
+					'    if [ "$PC_RUNNER_MONGO_TRIES" -eq "0" ]; then\n' +
+					'        echo "Timed out";\n' +
+					'        exit 1;\n' +
+					'    fi\n' +
+					'done'
+				);
 			} catch (e) {
-				throw new Error('The PrefillMongo() function failed. Check recent changes to the data files you are trying to inject for syntax errors.');
+				throw new Error('Mongo is in a crash loop. Please try again');
+			}
+
+			// setting an external Database URL means we dont prefill
+			if (this.prefillMongoValue) {
+				try {
+					await this.prefillMongoValue(this);
+				} catch (e) {
+					throw new Error('The PrefillMongo() function failed. Check recent changes to the data files you are trying to inject for syntax errors.');
+				}
 			}
 		}
-
 
 		// This is where CI and Dev testing split
 		// Dev- uses a volume where we transfer the files manually
@@ -630,7 +680,10 @@ module.exports = function(options) {
 		await PCBash.runCommandPromise('echo \'require("./' + fileName + '");\' >> ' + PCParseRunner.tempDir() + '/cloud-' + this.seed + '/' + this.mainPath);
 	}
 	async dropDB() {
-		await PCBash.runCommandPromise('docker exec mongo-' + this.seed + ' mongo ' + PCParseRunner.defaultDBName() + ' --eval "db.dropDatabase()"');
+		// We NEVER drop external DBs as they could be staging or production
+		if (!this.externalDatabaseURL) {
+			await PCBash.runCommandPromise('docker exec mongo-' + this.seed + ' mongo ' + PCParseRunner.defaultDBName() + ' --eval "db.dropDatabase()"');
+		}
 	}
 	nukeParseRunnerAllContainers() {
 		return 'docker ps --filter "label=parse-runner" | grep -v CONTAINER | awk \'{print $1}\' | xargs --no-run-if-empty sudo docker rm -f';
@@ -772,30 +825,32 @@ module.exports = function(options) {
 	}
 
 	async drop(className) {
-		const connectionString = this.mongoURL();
-		const client = await MongoClient.connect(connectionString,
-			{ useNewUrlParser: true, useUnifiedTopology: true });
-		const db = client.db(PCParseRunner.defaultDBName());
-		let res = null;
-		let err = null;
+		if (!this.externalDatabaseURL) {
+			const connectionString = this.mongoURL();
+			const client = await MongoClient.connect(connectionString,
+				{ useNewUrlParser: true, useUnifiedTopology: true });
+			const db = client.db(PCParseRunner.defaultDBName());
+			let res = null;
+			let err = null;
 
-		try {
-			res = await db.dropCollection(className);
-		} catch (e) {
-			if (e.message !== null) {
-				err = e.message;
-			} else {
-				err = 'drop Failed.';
+			try {
+				res = await db.dropCollection(className);
+			} catch (e) {
+				if (e.message !== null) {
+					err = e.message;
+				} else {
+					err = 'drop Failed.';
+				}
+			} finally {
+				client.close();
 			}
-		} finally {
-			client.close();
-		}
 
-		if (err !== null) {
-			throw new Error(err);
-		}
+			if (err !== null) {
+				throw new Error(err);
+			}
 
-		return res;
+			return res;
+		}
 	}
 }
 

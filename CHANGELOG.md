@@ -1,5 +1,10 @@
 ## PCParseRunner Changelog
 
+### 0.48.0
+- Switched Math.random to cryptographically secure RNG
+- use parse-1337 if present
+- added externalMongoURL for staging
+
 ### 0.47.0
 - added getParse
 - forced cleanup of cloud directory
