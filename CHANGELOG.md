@@ -1,5 +1,9 @@
 ## PCParseRunner Changelog
 
+### 0.49.0
+- Added ignoreCentralServer
+- Added ignoreCentralServer on helper classes and injectCode
+
 ### 0.48.1
 - Fixed wrong port bug
 

@@ -39,8 +39,11 @@ class PCParseRunner {
 		this.timeoutValue = 60; // default to 60 tries for parse server to start each a 1 second apart
 		this.collectCoverageValue = true;
 		this.env = {};
+		this.ignoreCentralServerValue = false;
 	}
-
+	ignoreCentralServer(input) {
+		this.ignoreCentralServerValue = input;
+	}
 	async getClock() {
 		// could also pass classname HelperClassPath: './NumberHelper.js',
 		const result = await Parse.Cloud.run('specGetCurrentTime');
@@ -135,6 +138,8 @@ class PCParseRunner {
 			throw new Error(notBothError);
 		}
 
+		// injecting code means we cant use the central server
+		this.ignoreCentralServerValue = true;
 		this.injectCodeValue = codeToInject;
 	}
 
@@ -440,6 +445,7 @@ module.exports = function(options) {
 	}
 
 	helperClass(input) {
+		this.ignoreCentralServerValue = true;
 		this.helperClassValue = input;
 	}
 
@@ -473,18 +479,21 @@ module.exports = function(options) {
 	}
 
 	async startParseServer() {
-		try {
-			const cc = await PCBash.runCommandPromise('docker inspect --format=\'{{.State.Running}}\' parse-1337 || echo false');
+		if(!this.ignoreCentralServerValue){
+			try {
+				const cc = await PCBash.runCommandPromise('docker inspect --format=\'{{.State.Running}}\' parse-1337 || echo false');
 
 
-			if (cc === 'true') {
-				// parse-1337 is present and running
-				return this.getParse(1337);
+				if (cc === 'true') {
+					// parse-1337 is present and running
+					return this.getParse(1337);
+				}
+			} catch (error) {
+				// it's ok
+
 			}
-		} catch (error) {
-			// it's ok
-
 		}
+		
 
 		process.env.TESTING = true;
 
@@ -658,11 +667,13 @@ module.exports = function(options) {
 
 	getParse(portOverride) {
 		Parse.initialize(localAppId, localJavascriptKey, localMasterKey);
-		if(portOverride){
+
+		if (portOverride) {
 			Parse.serverURL = 'http://localhost:' + portOverride + '/1';
-		}else{
+		} else {
 			Parse.serverURL = 'http://localhost:' + this.parsePort + '/1';
 		}
+
 		// eslint-disable-next-line no-console
 		console.log('Parse Server up and running');
 
